@@ -26,28 +26,28 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[];
 
-export interface AgencyRow {
+export type AgencyRow = {
   id: string;
   name: string;
   email: string;
   created_at: string;
 }
 
-export interface AgencyInsert {
+export type AgencyInsert = {
   id?: string;
   name: string;
   email: string;
   created_at?: string;
 }
 
-export interface AgencyUpdate {
+export type AgencyUpdate = {
   id?: string;
   name?: string;
   email?: string;
   created_at?: string;
 }
 
-export interface BrandProfileRow {
+export type BrandProfileRow = {
   id: string;
   agency_id: string;
   client_name: string;
@@ -69,7 +69,7 @@ export interface BrandProfileRow {
   updated_at: string;
 }
 
-export interface BrandProfileInsert {
+export type BrandProfileInsert = {
   id?: string;
   agency_id: string;
   client_name: string;
@@ -93,7 +93,7 @@ export interface BrandProfileInsert {
 
 export type BrandProfileUpdate = Partial<BrandProfileInsert>;
 
-export interface StrategyDocRow {
+export type StrategyDocRow = {
   id: string;
   brand_profile_id: string;
   month: string;
@@ -109,7 +109,7 @@ export interface StrategyDocRow {
   updated_at: string;
 }
 
-export interface StrategyDocInsert {
+export type StrategyDocInsert = {
   id?: string;
   brand_profile_id: string;
   month: string;
@@ -127,7 +127,7 @@ export interface StrategyDocInsert {
 
 export type StrategyDocUpdate = Partial<StrategyDocInsert>;
 
-export interface CalendarEntryRow {
+export type CalendarEntryRow = {
   id: string;
   brand_profile_id: string;
   month: string;
@@ -141,7 +141,7 @@ export interface CalendarEntryRow {
   updated_at: string;
 }
 
-export interface CalendarEntryInsert {
+export type CalendarEntryInsert = {
   id?: string;
   brand_profile_id: string;
   month: string;
@@ -157,7 +157,7 @@ export interface CalendarEntryInsert {
 
 export type CalendarEntryUpdate = Partial<CalendarEntryInsert>;
 
-export interface CopyRow {
+export type CopyRow = {
   id: string;
   calendar_entry_id: string;
   hook: string;
@@ -172,7 +172,7 @@ export interface CopyRow {
   updated_at: string;
 }
 
-export interface CopyInsert {
+export type CopyInsert = {
   id?: string;
   calendar_entry_id: string;
   hook: string;
@@ -189,7 +189,7 @@ export interface CopyInsert {
 
 export type CopyUpdate = Partial<CopyInsert>;
 
-export interface VisualBriefRow {
+export type VisualBriefRow = {
   id: string;
   calendar_entry_id: string;
   format: VisualBriefFormat;
@@ -204,7 +204,7 @@ export interface VisualBriefRow {
   updated_at: string;
 }
 
-export interface VisualBriefInsert {
+export type VisualBriefInsert = {
   id?: string;
   calendar_entry_id: string;
   format: VisualBriefFormat;
@@ -221,7 +221,7 @@ export interface VisualBriefInsert {
 
 export type VisualBriefUpdate = Partial<VisualBriefInsert>;
 
-export interface MonthlyReportRow {
+export type MonthlyReportRow = {
   id: string;
   brand_profile_id: string;
   month: string;
@@ -232,7 +232,7 @@ export interface MonthlyReportRow {
   updated_at: string;
 }
 
-export interface MonthlyReportInsert {
+export type MonthlyReportInsert = {
   id?: string;
   brand_profile_id: string;
   month: string;
@@ -252,38 +252,49 @@ export interface Database {
         Row: AgencyRow;
         Insert: AgencyInsert;
         Update: AgencyUpdate;
+        Relationships: [];
       };
       brand_profiles: {
         Row: BrandProfileRow;
         Insert: BrandProfileInsert;
         Update: BrandProfileUpdate;
+        Relationships: [];
       };
       strategy_docs: {
         Row: StrategyDocRow;
         Insert: StrategyDocInsert;
         Update: StrategyDocUpdate;
+        Relationships: [];
       };
       calendar_entries: {
         Row: CalendarEntryRow;
         Insert: CalendarEntryInsert;
         Update: CalendarEntryUpdate;
+        Relationships: [];
       };
       copies: {
         Row: CopyRow;
         Insert: CopyInsert;
         Update: CopyUpdate;
+        Relationships: [];
       };
       visual_briefs: {
         Row: VisualBriefRow;
         Insert: VisualBriefInsert;
         Update: VisualBriefUpdate;
+        Relationships: [];
       };
       monthly_reports: {
         Row: MonthlyReportRow;
         Insert: MonthlyReportInsert;
         Update: MonthlyReportUpdate;
+        Relationships: [];
       };
     };
+    Views: Record<string, never>;
+    Functions: Record<string, never>;
+    Enums: Record<string, never>;
+    CompositeTypes: Record<string, never>;
   };
 }
 
