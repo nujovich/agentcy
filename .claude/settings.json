@@ -1,0 +1,9 @@
+{
+  "sandbox": {
+    "network": {
+      "allowedDomains": [
+        "ui.shadcn.com"
+      ]
+    }
+  }
+}
