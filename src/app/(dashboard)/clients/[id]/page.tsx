@@ -4,6 +4,14 @@ import { BrandProfileCard } from '@/components/clients/brand-profile-card';
 import { PipelineStep } from '@/components/clients/pipeline-step';
 import { dbToBrandProfile } from '@/lib/supabase/database.types';
 import { createClient } from '@/lib/supabase/server';
+import type { Pack } from '@/types/brand-profile';
+
+const PACK_LABEL: Record<Pack, string> = {
+  esencial: 'Esencial',
+  gold: 'Gold',
+  pro: 'Pro',
+  elite: 'Elite',
+};
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -29,19 +37,14 @@ export default async function ClientPage({ params }: PageProps) {
 
   const profile = dbToBrandProfile(row);
 
+  // strategy_docs has no agency_id column — tenancy enforced via brand_profiles fetch above + RLS
   const { count: strategyCount } = await supabase
     .from('strategy_docs')
     .select('id', { count: 'exact', head: true })
-    .eq('brand_profile_id', id);
+    .eq('brand_profile_id', id)
+    .eq('status', 'approved');
 
   const strategyStatus = (strategyCount ?? 0) > 0 ? 'approved' : 'unlocked';
-
-  const PACK_LABEL: Record<string, string> = {
-    esencial: 'Esencial',
-    gold: 'Gold',
-    pro: 'Pro',
-    elite: 'Elite',
-  };
 
   return (
     <main className="mx-auto max-w-3xl space-y-6 p-6">
