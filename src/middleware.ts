@@ -3,6 +3,8 @@ import { NextResponse, type NextRequest } from 'next/server';
 
 import type { Database } from '@/lib/supabase/database.types';
 
+const PUBLIC_PATHS = ['/login', '/auth'];
+
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({ request });
 
@@ -27,7 +29,22 @@ export async function middleware(request: NextRequest) {
     },
   );
 
-  await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const { pathname } = request.nextUrl;
+  const isPublic = PUBLIC_PATHS.some(
+    (p) => pathname === p || pathname.startsWith(`${p}/`),
+  );
+
+  if (!user && !isPublic) {
+    const loginUrl = new URL('/login', request.url);
+    if (pathname !== '/') {
+      loginUrl.searchParams.set('next', pathname);
+    }
+    return NextResponse.redirect(loginUrl);
+  }
 
   return response;
 }
