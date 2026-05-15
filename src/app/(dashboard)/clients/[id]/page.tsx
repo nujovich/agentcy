@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 import { BrandProfileCard } from '@/components/clients/brand-profile-card';
@@ -31,6 +32,7 @@ export default async function ClientPage({ params }: PageProps) {
     .select('*')
     .eq('id', id)
     .eq('agency_id', user.id)
+    .eq('status', 'approved')
     .single();
 
   if (error || !row) notFound();
@@ -50,12 +52,12 @@ export default async function ClientPage({ params }: PageProps) {
     <main className="mx-auto max-w-3xl space-y-6 p-6">
       {/* Header */}
       <header className="space-y-1">
-        <a
+        <Link
           href="/dashboard"
           className="text-xs text-muted-foreground hover:underline"
         >
           ← Volver al dashboard
-        </a>
+        </Link>
         <div className="flex items-start justify-between">
           <div>
             <h1 className="text-2xl font-semibold">{profile.clientName}</h1>
@@ -77,7 +79,7 @@ export default async function ClientPage({ params }: PageProps) {
       <section className="space-y-3">
         <h2 className="text-base font-semibold">Pipeline</h2>
         <div className="space-y-2">
-          <PipelineStep label="Brand Intake" status="approved" />
+          <PipelineStep label="Brand Intake" status={profile.status === 'approved' ? 'approved' : 'unlocked'} />
           <PipelineStep
             label="Strategy Agent"
             status={strategyStatus}

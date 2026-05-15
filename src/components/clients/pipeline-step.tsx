@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 import { cn } from '@/lib/utils';
 
 type PipelineStatus = 'approved' | 'unlocked' | 'locked';
@@ -36,12 +38,12 @@ export function PipelineStep({ label, status, href }: PipelineStepProps) {
         </div>
       </div>
       {status === 'unlocked' && href ? (
-        <a
+        <Link
           href={href}
           className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90"
         >
           Generar →
-        </a>
+        </Link>
       ) : null}
     </div>
   );
