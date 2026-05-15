@@ -1,3 +1,5 @@
+import { cn } from '@/lib/utils';
+
 type PipelineStatus = 'approved' | 'unlocked' | 'locked';
 
 interface PipelineStepProps {
@@ -21,9 +23,10 @@ const STATUS_LABEL: Record<PipelineStatus, string> = {
 export function PipelineStep({ label, status, href }: PipelineStepProps) {
   return (
     <div
-      className={`flex items-center justify-between rounded-lg border border-border p-4 ${
-        status === 'locked' ? 'opacity-40' : ''
-      }`}
+      className={cn(
+        'flex items-center justify-between rounded-lg border border-border p-4',
+        status === 'locked' && 'opacity-40',
+      )}
     >
       <div className="flex items-center gap-3">
         <span className="text-lg">{STATUS_ICON[status]}</span>
