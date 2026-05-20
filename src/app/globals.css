@@ -7,9 +7,9 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
-  --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
+  --font-sans: var(--font-body);
+  --font-mono: var(--font-mono-brand);
+  --font-heading: var(--font-heading-brand);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -48,73 +48,142 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+/* =============================================================
+   Agentcy — brand tokens (single source of truth)
+   ============================================================= */
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  /* Brand palette */
+  --brand-primary:        #0D7377;
+  --brand-primary-dark:   #0A5E62;
+  --brand-primary-darker: #08484B;
+  --brand-primary-light:  #14ABAB;
+  --brand-primary-soft:   #D5EEEE;
+
+  --brand-accent:         #F2A65A;
+  --brand-accent-soft:    #FDE8CE;
+  --brand-accent-dark:    #C7823F;
+
+  /* Neutrals — light */
+  --brand-ink:        #0F1923;
+  --brand-ink-soft:   #4A5568;
+  --brand-ink-muted:  #94A3B8;
+  --brand-surface:    #F8FAFB;
+  --brand-surface-2:  #EEF2F5;
+  --brand-surface-3:  #E2E8EE;
+  --brand-border:     #E2E8EE;
+  --brand-border-strong: #CBD5E1;
+
+  /* Neutrals — dark */
+  --brand-dark-bg:        #0B1015;
+  --brand-dark-surface:   #111A22;
+  --brand-dark-surface-2: #182330;
+  --brand-dark-surface-3: #1E2D3D;
+  --brand-dark-border:    #1E2D3D;
+  --brand-dark-border-strong: #2C3E54;
+  --brand-dark-ink:       #E6EDF3;
+  --brand-dark-ink-soft:  #94A3B8;
+  --brand-dark-ink-muted: #5B6B7E;
+
+  /* Semantic */
+  --brand-success:        #1B8A5A;
+  --brand-success-soft:   #D8F0E4;
+  --brand-warning:        #C58722;
+  --brand-warning-soft:   #FCEED1;
+  --brand-danger:         #C0392B;
+  --brand-danger-soft:    #F8D7D3;
+
+  /* Pipeline state */
+  --state-idle:     var(--brand-ink-muted);
+  --state-running:  var(--brand-primary-light);
+  --state-awaiting: var(--brand-accent);
+  --state-approved: var(--brand-success);
+  --state-blocked:  var(--brand-danger);
+
+  /* Shadows (Linear-style, subtle) */
+  --shadow-xs: 0 1px 2px rgba(15, 25, 35, 0.04);
+  --shadow-sm: 0 1px 3px rgba(15, 25, 35, 0.06), 0 1px 2px rgba(15, 25, 35, 0.04);
+  --shadow-md: 0 4px 12px rgba(15, 25, 35, 0.08), 0 2px 4px rgba(15, 25, 35, 0.04);
+  --shadow-lg: 0 10px 30px rgba(15, 25, 35, 0.12), 0 4px 10px rgba(15, 25, 35, 0.06);
+  --shadow-glow-primary: 0 0 0 4px rgba(13, 115, 119, 0.15);
+  --shadow-glow-accent:  0 0 0 4px rgba(242, 166, 90, 0.20);
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur-fast: 120ms;
+  --dur-base: 200ms;
+  --dur-slow: 320ms;
+}
+
+/* =============================================================
+   shadcn semantic tokens — mapped to Agentcy palette
+   ============================================================= */
+:root {
+  --background: var(--brand-surface);
+  --foreground: var(--brand-ink);
+  --card: #FFFFFF;
+  --card-foreground: var(--brand-ink);
+  --popover: #FFFFFF;
+  --popover-foreground: var(--brand-ink);
+  --primary: var(--brand-primary);
+  --primary-foreground: #FFFFFF;
+  --secondary: var(--brand-surface-2);
+  --secondary-foreground: var(--brand-ink);
+  --muted: var(--brand-surface-2);
+  --muted-foreground: var(--brand-ink-soft);
+  --accent: var(--brand-accent);
+  --accent-foreground: #2A1505;
+  --destructive: var(--brand-danger);
+  --border: var(--brand-border);
+  --input: var(--brand-border);
+  --ring: var(--brand-primary);
+  --chart-1: var(--brand-primary);
+  --chart-2: var(--brand-accent);
+  --chart-3: var(--brand-primary-light);
+  --chart-4: var(--brand-warning);
+  --chart-5: var(--brand-success);
+  --radius: 0.75rem;
+  --sidebar: var(--brand-surface);
+  --sidebar-foreground: var(--brand-ink);
+  --sidebar-primary: var(--brand-primary);
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: var(--brand-surface-2);
+  --sidebar-accent-foreground: var(--brand-ink);
+  --sidebar-border: var(--brand-border);
+  --sidebar-ring: var(--brand-primary);
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --background: var(--brand-dark-bg);
+  --foreground: var(--brand-dark-ink);
+  --card: var(--brand-dark-surface);
+  --card-foreground: var(--brand-dark-ink);
+  --popover: var(--brand-dark-surface);
+  --popover-foreground: var(--brand-dark-ink);
+  --primary: var(--brand-primary-light);
+  --primary-foreground: #061416;
+  --secondary: var(--brand-dark-surface-2);
+  --secondary-foreground: var(--brand-dark-ink);
+  --muted: var(--brand-dark-surface-2);
+  --muted-foreground: var(--brand-dark-ink-soft);
+  --accent: var(--brand-accent);
+  --accent-foreground: #2A1505;
+  --destructive: #E07368;
+  --border: var(--brand-dark-border);
+  --input: var(--brand-dark-border);
+  --ring: var(--brand-primary-light);
+  --chart-1: var(--brand-primary-light);
+  --chart-2: var(--brand-accent);
+  --chart-3: var(--brand-primary);
+  --chart-4: var(--brand-warning);
+  --chart-5: var(--brand-success);
+  --sidebar: var(--brand-dark-surface);
+  --sidebar-foreground: var(--brand-dark-ink);
+  --sidebar-primary: var(--brand-primary-light);
+  --sidebar-primary-foreground: #061416;
+  --sidebar-accent: var(--brand-dark-surface-2);
+  --sidebar-accent-foreground: var(--brand-dark-ink);
+  --sidebar-border: var(--brand-dark-border);
+  --sidebar-ring: var(--brand-primary-light);
 }
 
 @layer base {
@@ -123,8 +192,27 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "cv11";
   }
   html {
     @apply font-sans;
+  }
+  h1, h2, h3, h4, h5 {
+    font-family: var(--font-heading);
+    letter-spacing: -0.02em;
+  }
+  code, kbd, pre, samp, .font-mono {
+    font-family: var(--font-mono);
+  }
+}
+
+@layer components {
+  .eyebrow {
+    font-family: var(--font-heading);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
   }
 }

@@ -66,8 +66,14 @@ export default async function ClientPage({ params }: PageProps) {
               {profile.location ? ` · ${profile.location}` : ''}
             </p>
           </div>
-          <span className="rounded-full border border-border px-3 py-1 text-xs font-medium">
-            {PACK_LABEL[profile.pack]}
+          <span
+            className="rounded-full px-3 py-1 font-mono text-[11px] font-semibold uppercase tracking-[0.06em]"
+            style={{
+              background: 'var(--brand-primary-soft)',
+              color: 'var(--brand-primary-dark)',
+            }}
+          >
+            Pack {PACK_LABEL[profile.pack]}
           </span>
         </div>
       </header>
@@ -79,15 +85,17 @@ export default async function ClientPage({ params }: PageProps) {
       <section className="space-y-3">
         <h2 className="text-base font-semibold">Pipeline</h2>
         <div className="space-y-2">
-          <PipelineStep label="Brand Intake" status={profile.status === 'approved' ? 'approved' : 'unlocked'} />
+          <PipelineStep index={1} label="Brand Intake" status={profile.status === 'approved' ? 'approved' : 'unlocked'} />
           <PipelineStep
+            index={2}
             label="Strategy Agent"
             status={strategyStatus}
             href={strategyStatus === 'unlocked' ? `/clients/${id}/strategy/new` : undefined}
           />
-          <PipelineStep label="Copy" status="locked" />
-          <PipelineStep label="Visual Brief" status="locked" />
-          <PipelineStep label="Calendar" status="locked" />
+          <PipelineStep index={3} label="Copy" status="locked" />
+          <PipelineStep index={4} label="Visual Brief" status="locked" />
+          <PipelineStep index={5} label="Calendar" status="locked" />
+          <PipelineStep index={6} label="Report" status="locked" />
         </div>
       </section>
     </main>
