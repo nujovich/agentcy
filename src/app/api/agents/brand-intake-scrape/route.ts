@@ -21,7 +21,9 @@ Respondé ÚNICAMENTE con un objeto JSON válido con esta estructura exacta:
   "mainServices": "descripción de servicios principales en 1-2 líneas",
   "toneOfVoice": "tono de comunicación (formal/casual/técnico/creativo/inspirador)",
   "targetAudience": "descripción de la audiencia principal",
-  "contentPillars": ["pilar1", "pilar2", "pilar3"]
+  "contentPillars": ["pilar1", "pilar2", "pilar3"],
+  "competitors": ["competidor1", "competidor2"],
+  "goals": ["objetivo1", "objetivo2"]
 }
 
 Si no podés inferir un campo con confianza, usá string vacío o array vacío.
@@ -179,6 +181,8 @@ Extraé el perfil de marca en JSON.
       toneOfVoice: z.string().optional().default(''),
       targetAudience: z.string().optional().default(''),
       contentPillars: z.array(z.string()).optional().default([]),
+      competitors: z.array(z.string()).optional().default([]),
+      goals: z.array(z.string()).optional().default([]),
     });
 
     let extracted: z.infer<typeof llmResponseSchema>;
@@ -204,6 +208,8 @@ Extraé el perfil de marca en JSON.
         youtube: socialLinks.youtube,
       },
       contentPillars: extracted.contentPillars ?? [],
+      competitors: extracted.competitors ?? [],
+      goals: extracted.goals ?? [],
     };
 
     return NextResponse.json({ profile });

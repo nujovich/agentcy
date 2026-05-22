@@ -17,6 +17,8 @@ export interface SimpleBrandProfile {
     youtube?: string;
   };
   contentPillars: string[];
+  competitors?: string[];
+  goals?: string[];
 }
 
 export interface ChatMessage {
