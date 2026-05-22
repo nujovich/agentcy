@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
+import { ApproveButton } from '@/components/clients/approve-button';
 import { BrandProfileCard } from '@/components/clients/brand-profile-card';
 import { PipelineStep } from '@/components/clients/pipeline-step';
 import { dbToBrandProfile } from '@/lib/supabase/database.types';
@@ -32,12 +33,110 @@ export default async function ClientPage({ params }: PageProps) {
     .select('*')
     .eq('id', id)
     .eq('agency_id', user.id)
-    .eq('status', 'approved')
     .single();
 
   if (error || !row) notFound();
 
   const profile = dbToBrandProfile(row);
+
+  if (profile.status === 'draft') {
+    return (
+      <main className="mx-auto max-w-2xl space-y-6 p-6">
+        <header className="space-y-1">
+          <Link href="/dashboard" className="text-xs text-muted-foreground hover:underline">
+            ← Volver al dashboard
+          </Link>
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h1 className="text-2xl font-semibold">{profile.clientName}</h1>
+              <p className="text-sm text-muted-foreground">{profile.industry}</p>
+            </div>
+            <span
+              className="shrink-0 rounded-full px-3 py-1 font-mono text-[11px] font-semibold uppercase tracking-[0.06em]"
+              style={{ background: 'var(--brand-accent-soft)', color: 'var(--brand-accent-dark)' }}
+            >
+              Borrador
+            </span>
+          </div>
+        </header>
+
+        {/* Captured data */}
+        <section className="space-y-4 rounded-xl border border-border p-5">
+          <h2 className="text-sm font-semibold">Datos capturados</h2>
+
+          <div className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
+            {profile.website ? (
+              <div>
+                <p className="text-xs font-medium text-muted-foreground">Sitio web</p>
+                <a
+                  href={profile.website}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline truncate block"
+                >
+                  {profile.website}
+                </a>
+              </div>
+            ) : null}
+
+            {profile.voice.tone ? (
+              <div>
+                <p className="text-xs font-medium text-muted-foreground">Tono de voz</p>
+                <p>{profile.voice.tone}</p>
+              </div>
+            ) : null}
+          </div>
+
+          {profile.contentPillars.length > 0 ? (
+            <div>
+              <p className="text-xs font-medium text-muted-foreground mb-2">Pilares de contenido</p>
+              <div className="flex flex-wrap gap-2">
+                {profile.contentPillars.map((pillar) => (
+                  <span
+                    key={pillar}
+                    className="rounded-full px-3 py-1 text-xs font-medium"
+                    style={{ background: 'var(--brand-primary-soft)', color: 'var(--brand-primary-dark)' }}
+                  >
+                    {pillar}
+                  </span>
+                ))}
+              </div>
+            </div>
+          ) : null}
+
+          {Object.keys(profile.socialUrls).length > 0 ? (
+            <div>
+              <p className="text-xs font-medium text-muted-foreground mb-2">Redes sociales</p>
+              <div className="flex flex-wrap gap-2">
+                {Object.entries(profile.socialUrls).map(([net, url]) => (
+                  <a
+                    key={net}
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="rounded-full border border-border px-3 py-1 text-xs hover:border-primary hover:text-primary transition-colors capitalize"
+                  >
+                    {net}
+                  </a>
+                ))}
+              </div>
+            </div>
+          ) : null}
+        </section>
+
+        {/* Actions */}
+        <section className="space-y-3">
+          <ApproveButton profileId={profile.id} />
+          <Link
+            href="/clients/new/manual"
+            className="block w-full rounded-lg border border-border px-4 py-2.5 text-center text-sm font-medium text-muted-foreground hover:border-foreground hover:text-foreground transition-colors"
+          >
+            Editar / completar campos
+          </Link>
+        </section>
+      </main>
+    );
+  }
 
   // strategy_docs has no agency_id column — tenancy enforced via brand_profiles fetch above + RLS
   const { count: strategyCount } = await supabase
