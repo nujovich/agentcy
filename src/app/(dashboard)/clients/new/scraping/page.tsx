@@ -75,8 +75,8 @@ export default function URLScrapingPage() {
           location: '',
         },
         content_pillars: profile.contentPillars,
-        competitors: [],
-        goals: [],
+        competitors: profile.competitors ?? [],
+        goals: profile.goals ?? [],
         visual_kit: {
           primaryColors: [],
           secondaryColors: [],

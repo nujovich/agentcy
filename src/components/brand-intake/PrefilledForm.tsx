@@ -20,6 +20,8 @@ export function PrefilledForm({ initialData, onSave, isSaving }: PrefilledFormPr
     mainServices: initialData.mainServices ?? '',
     socialMedia: initialData.socialMedia ?? {},
     contentPillars: initialData.contentPillars ?? [],
+    competitors: initialData.competitors ?? [],
+    goals: initialData.goals ?? [],
   });
 
   const set = <K extends keyof SimpleBrandProfile>(key: K, value: SimpleBrandProfile[K]) => {
@@ -89,6 +91,28 @@ export function PrefilledForm({ initialData, onSave, isSaving }: PrefilledFormPr
             set('contentPillars', e.target.value.split('\n').filter(Boolean).slice(0, 4))
           }
           rows={4}
+          className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/30"
+        />
+      </Field>
+
+      <Field label="Competidores (uno por línea)">
+        <textarea
+          value={(form.competitors ?? []).join('\n')}
+          onChange={(e) =>
+            set('competitors', e.target.value.split('\n').filter(Boolean))
+          }
+          rows={3}
+          className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/30"
+        />
+      </Field>
+
+      <Field label="Objetivos (uno por línea)">
+        <textarea
+          value={(form.goals ?? []).join('\n')}
+          onChange={(e) =>
+            set('goals', e.target.value.split('\n').filter(Boolean))
+          }
+          rows={3}
           className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/30"
         />
       </Field>
