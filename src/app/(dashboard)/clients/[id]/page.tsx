@@ -138,11 +138,11 @@ export default async function ClientPage({ params }: PageProps) {
     );
   }
 
-  // strategy_docs has no agency_id column — tenancy enforced via brand_profiles fetch above + RLS
   const { count: strategyCount } = await supabase
-    .from('strategy_docs')
+    .from('strategies')
     .select('id', { count: 'exact', head: true })
     .eq('brand_profile_id', id)
+    .eq('agency_id', user.id)
     .eq('status', 'approved');
 
   const strategyStatus = (strategyCount ?? 0) > 0 ? 'approved' : 'unlocked';
