@@ -17,6 +17,15 @@ import type {
   VisualBriefTypography,
   VisualKit,
 } from '@/types/brand-profile';
+import type {
+  ChannelStrategy,
+  ContentPillar,
+  KPI,
+  Strategy,
+  StrategyContentMix,
+  StrategyObjectives,
+  StrategyStatus,
+} from '@/types/strategy';
 
 export type Json =
   | string
@@ -92,6 +101,70 @@ export type BrandProfileInsert = {
 }
 
 export type BrandProfileUpdate = Partial<BrandProfileInsert>;
+
+export type StrategyRow = {
+  id: string;
+  brand_profile_id: string;
+  agency_id: string;
+  objectives: StrategyObjectives;
+  primary_channels: string[];
+  channel_strategies: ChannelStrategy[];
+  content_pillars: ContentPillar[];
+  content_mix: StrategyContentMix;
+  kpis: KPI[];
+  posting_frequency: Record<string, string>;
+  best_posting_times: Record<string, string[]>;
+  reasoning: string;
+  next_steps: string;
+  feedback: string | null;
+  status: StrategyStatus;
+  created_at: string;
+  updated_at: string;
+};
+
+export type StrategyInsert = {
+  id?: string;
+  brand_profile_id: string;
+  agency_id: string;
+  objectives: StrategyObjectives;
+  primary_channels: string[];
+  channel_strategies: ChannelStrategy[];
+  content_pillars: ContentPillar[];
+  content_mix: StrategyContentMix;
+  kpis: KPI[];
+  posting_frequency: Record<string, string>;
+  best_posting_times: Record<string, string[]>;
+  reasoning: string;
+  next_steps: string;
+  feedback?: string | null;
+  status?: StrategyStatus;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type StrategyUpdate = Partial<StrategyInsert>;
+
+export function dbToStrategy(row: StrategyRow): Strategy {
+  return {
+    id: row.id,
+    brandProfileId: row.brand_profile_id,
+    agencyId: row.agency_id,
+    objectives: row.objectives,
+    primaryChannels: row.primary_channels,
+    channelStrategies: row.channel_strategies,
+    contentPillars: row.content_pillars,
+    contentMix: row.content_mix,
+    kpis: row.kpis,
+    postingFrequency: row.posting_frequency,
+    bestPostingTimes: row.best_posting_times,
+    reasoning: row.reasoning,
+    nextSteps: row.next_steps,
+    feedback: row.feedback,
+    status: row.status,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
 
 export type StrategyDocRow = {
   id: string;
@@ -258,6 +331,12 @@ export interface Database {
         Row: BrandProfileRow;
         Insert: BrandProfileInsert;
         Update: BrandProfileUpdate;
+        Relationships: [];
+      };
+      strategies: {
+        Row: StrategyRow;
+        Insert: StrategyInsert;
+        Update: StrategyUpdate;
         Relationships: [];
       };
       strategy_docs: {
