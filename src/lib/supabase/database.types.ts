@@ -115,7 +115,7 @@ export type StrategyRow = {
   content_mix: StrategyContentMix;
   current_followers_data: Record<string, number> | null;
   scenario_conservative: KPIScenario | null;
-  scenario_balanced: KPIScenario | null;
+  scenario_sustainable: KPIScenario | null;
   scenario_aggressive: KPIScenario | null;
   selected_scenario: ScenarioName | null;
   kpis: KPI[];
@@ -140,7 +140,7 @@ export type StrategyInsert = {
   content_mix: StrategyContentMix;
   current_followers_data?: Record<string, number> | null;
   scenario_conservative?: KPIScenario | null;
-  scenario_balanced?: KPIScenario | null;
+  scenario_sustainable?: KPIScenario | null;
   scenario_aggressive?: KPIScenario | null;
   selected_scenario?: ScenarioName | null;
   kpis: KPI[];
@@ -168,7 +168,7 @@ export function dbToStrategy(row: StrategyRow): Strategy {
     contentMix: row.content_mix,
     currentFollowersData: row.current_followers_data,
     scenarioConservative: row.scenario_conservative,
-    scenarioBalanced: row.scenario_balanced,
+    scenarioSustainable: row.scenario_sustainable,
     scenarioAggressive: row.scenario_aggressive,
     selectedScenario: row.selected_scenario,
     kpis: row.kpis,

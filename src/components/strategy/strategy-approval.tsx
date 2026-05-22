@@ -77,11 +77,20 @@ export function StrategyApproval({ strategy, onApprove, onReject }: StrategyAppr
             <div className="space-y-4">
               {strategy.channelStrategies.map((ch) => (
                 <div key={ch.name} className="space-y-2 border-b border-border pb-4 last:border-0 last:pb-0">
-                  <div className="flex items-center justify-between">
-                    <p className="font-medium text-sm">{ch.name}</p>
-                    <span className="font-mono text-xs text-muted-foreground">
-                      {ch.allocation}% · {ch.frequency}
-                    </span>
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium text-sm">{ch.name}</p>
+                      <span
+                        className="rounded-full px-2 py-0.5 font-mono text-[10px] font-medium"
+                        style={{
+                          background: 'var(--brand-primary-soft)',
+                          color: 'var(--brand-primary-dark)',
+                        }}
+                      >
+                        {ch.allocation}%
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">{ch.frequency}</p>
                   </div>
                   <p className="text-xs text-muted-foreground">{ch.rationale}</p>
                   <div className="flex flex-wrap gap-1">

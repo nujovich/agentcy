@@ -13,7 +13,7 @@ interface KPICalibrationPanelProps {
 const HINT: Record<ScenarioName, string> = {
   conservative:
     'Ideal si recién empezás o tenés poco tiempo. Crecimiento lento pero 100% alcanzable con constancia.',
-  balanced:
+  sustainable:
     'El mejor balance entre esfuerzo y resultado. Con 6-8h/semana dedicadas, es muy alcanzable.',
   aggressive:
     'Requiere inversión en ads y contenido premium. Riesgoso sin experiencia en pauta digital.',
@@ -29,7 +29,7 @@ const SCENARIO_STYLE: Record<
     badge: 'var(--brand-ink-muted)',
     badgeBg: 'var(--brand-surface-2)',
   },
-  balanced: {
+  sustainable: {
     border: 'var(--brand-primary)',
     bg: 'var(--brand-primary-soft)',
     badge: 'var(--brand-primary-dark)',
@@ -69,7 +69,7 @@ function ScenarioCard({
     >
       <div className="flex items-start justify-between gap-2 mb-3">
         <p className="font-heading text-sm font-semibold">{scenario.label}</p>
-        {scenario.name === 'balanced' && (
+        {scenario.name === 'sustainable' && (
           <span
             className="shrink-0 rounded-full px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wide"
             style={{ background: style.badgeBg, color: style.badge }}
@@ -101,12 +101,12 @@ function ScenarioCard({
 }
 
 export function KPICalibrationPanel({ strategy, onSelectScenario }: KPICalibrationPanelProps) {
-  const [selected, setSelected] = useState<ScenarioName>('balanced');
+  const [selected, setSelected] = useState<ScenarioName>('sustainable');
   const [isLoading, setIsLoading] = useState(false);
 
   const scenarios = [
     strategy.scenarioConservative,
-    strategy.scenarioBalanced,
+    strategy.scenarioSustainable,
     strategy.scenarioAggressive,
   ].filter((s): s is KPIScenario => s !== null);
 

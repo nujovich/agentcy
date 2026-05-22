@@ -37,7 +37,7 @@ export interface KPI {
   importance: KPIImportance;
 }
 
-export type ScenarioName = 'conservative' | 'balanced' | 'aggressive';
+export type ScenarioName = 'conservative' | 'sustainable' | 'aggressive';
 
 export interface KPIScenario {
   name: ScenarioName;
@@ -63,7 +63,7 @@ export interface Strategy {
   contentMix: StrategyContentMix;
   currentFollowersData: Record<string, number> | null;
   scenarioConservative: KPIScenario | null;
-  scenarioBalanced: KPIScenario | null;
+  scenarioSustainable: KPIScenario | null;
   scenarioAggressive: KPIScenario | null;
   selectedScenario: ScenarioName | null;
   kpis: KPI[];

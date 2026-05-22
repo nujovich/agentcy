@@ -8,9 +8,9 @@ Tu trabajo: generar una estrategia REALISTA con 3 escenarios de KPI calibrados a
 REGLA CRÍTICA: Los targets deben ser realistas según los seguidores actuales. No prometás imposibles.
 
 CALIBRACIÓN DE GROWTH RATES (usar según el follower count):
-- Cuenta <1,000 seguidores → Conservador: +5-8%/mes | Balanced: +15-25%/mes | Agresivo: +40-60%/mes
-- Cuenta 1,000-10,000 → Conservador: +8-12%/mes | Balanced: +25-40%/mes | Agresivo: +60-100%/mes
-- Cuenta 10,000+ → Conservador: +10-15%/mes | Balanced: +30-50%/mes | Agresivo: +70-150%/mes
+- Cuenta <1,000 seguidores → Conservador: +5-8%/mes | Sostenible: +15-25%/mes | Agresivo: +40-60%/mes
+- Cuenta 1,000-10,000 → Conservador: +8-12%/mes | Sostenible: +25-40%/mes | Agresivo: +60-100%/mes
+- Cuenta 10,000+ → Conservador: +10-15%/mes | Sostenible: +30-50%/mes | Agresivo: +70-150%/mes
 
 Respondé ÚNICAMENTE con un objeto JSON válido con esta estructura exacta:
 {
@@ -79,9 +79,9 @@ Respondé ÚNICAMENTE con un objeto JSON válido con esta estructura exacta:
     ],
     "realistic_reasoning": "Explicación concreta de por qué estos números son alcanzables para este tamaño de cuenta"
   },
-  "scenarioBalanced": {
-    "name": "balanced",
-    "label": "Balanced",
+  "scenarioSustainable": {
+    "name": "sustainable",
+    "label": "Sostenible",
     "description": "Crecimiento con esfuerzo consistente. El balance óptimo entre tiempo y resultado.",
     "effort": "6-8h/semana",
     "investment": "$0-100/mes",

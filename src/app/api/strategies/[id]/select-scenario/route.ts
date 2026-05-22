@@ -5,7 +5,7 @@ import { dbToStrategy } from '@/lib/supabase/database.types';
 import { createClient } from '@/lib/supabase/server';
 
 const bodySchema = z.object({
-  scenario: z.enum(['conservative', 'balanced', 'aggressive']),
+  scenario: z.enum(['conservative', 'sustainable', 'aggressive']),
 });
 
 interface RouteContext {
@@ -54,8 +54,8 @@ export async function POST(request: Request, { params }: RouteContext) {
   const scenarioData =
     scenario === 'conservative'
       ? existing.scenario_conservative
-      : scenario === 'balanced'
-        ? existing.scenario_balanced
+      : scenario === 'sustainable'
+        ? existing.scenario_sustainable
         : existing.scenario_aggressive;
 
   if (!scenarioData) {

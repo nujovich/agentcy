@@ -20,7 +20,7 @@ const kpiSchema = z.object({
 });
 
 const scenarioSchema = z.object({
-  name: z.enum(['conservative', 'balanced', 'aggressive']),
+  name: z.enum(['conservative', 'sustainable', 'aggressive']),
   label: z.string(),
   description: z.string(),
   effort: z.string(),
@@ -68,7 +68,7 @@ const llmResponseSchema = z.object({
     behind_the_scenes: z.number(),
   }),
   scenarioConservative: scenarioSchema,
-  scenarioBalanced: scenarioSchema,
+  scenarioSustainable: scenarioSchema,
   scenarioAggressive: scenarioSchema,
   postingFrequency: z.record(z.string(), z.string()),
   bestPostingTimes: z.record(z.string(), z.array(z.string())),
@@ -145,10 +145,10 @@ export async function POST(request: Request) {
       content_mix: extracted.contentMix,
       current_followers_data: currentFollowersData,
       scenario_conservative: extracted.scenarioConservative,
-      scenario_balanced: extracted.scenarioBalanced,
+      scenario_sustainable: extracted.scenarioSustainable,
       scenario_aggressive: extracted.scenarioAggressive,
       selected_scenario: null,
-      kpis: extracted.scenarioBalanced.kpis,
+      kpis: extracted.scenarioSustainable.kpis,
       posting_frequency: extracted.postingFrequency,
       best_posting_times: extracted.bestPostingTimes,
       reasoning: extracted.reasoning,
