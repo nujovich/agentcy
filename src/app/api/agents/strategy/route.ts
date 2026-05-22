@@ -116,7 +116,6 @@ export async function POST(request: Request) {
       system: STRATEGY_SYSTEM_PROMPT,
       prompt: buildStrategyUserPrompt(profile),
       maxTokens: 3000,
-      temperature: 0.3,
     });
 
     const cleaned = stripCodeFences(text);
