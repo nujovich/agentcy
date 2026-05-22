@@ -28,6 +28,11 @@ import type {
   StrategyObjectives,
   StrategyStatus,
 } from '@/types/strategy';
+import type {
+  CalendarPost,
+  CalendarStatus,
+  EditorialCalendar,
+} from '@/types/calendar';
 
 export type Json =
   | string
@@ -335,6 +340,58 @@ export type MonthlyReportInsert = {
 
 export type MonthlyReportUpdate = Partial<MonthlyReportInsert>;
 
+export type EditorialCalendarRow = {
+  id: string;
+  strategy_id: string | null;
+  brand_profile_id: string;
+  agency_id: string;
+  month: string;
+  year: number;
+  posts: CalendarPost[];
+  total_posts: number;
+  posts_by_channel: Record<string, number>;
+  pillar_distribution: Record<string, number>;
+  status: CalendarStatus;
+  created_at: string;
+  updated_at: string;
+};
+
+export type EditorialCalendarInsert = {
+  id?: string;
+  strategy_id?: string | null;
+  brand_profile_id: string;
+  agency_id: string;
+  month: string;
+  year: number;
+  posts: CalendarPost[];
+  total_posts: number;
+  posts_by_channel: Record<string, number>;
+  pillar_distribution: Record<string, number>;
+  status?: CalendarStatus;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type EditorialCalendarUpdate = Partial<EditorialCalendarInsert>;
+
+export function dbToEditorialCalendar(row: EditorialCalendarRow): EditorialCalendar {
+  return {
+    id: row.id,
+    strategyId: row.strategy_id,
+    brandProfileId: row.brand_profile_id,
+    agencyId: row.agency_id,
+    month: row.month,
+    year: row.year,
+    posts: row.posts,
+    totalPosts: row.total_posts,
+    postsByChannel: row.posts_by_channel,
+    pillarDistribution: row.pillar_distribution,
+    status: row.status,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
 export interface Database {
   public: {
     Tables: {
@@ -360,6 +417,12 @@ export interface Database {
         Row: StrategyDocRow;
         Insert: StrategyDocInsert;
         Update: StrategyDocUpdate;
+        Relationships: [];
+      };
+      editorial_calendars: {
+        Row: EditorialCalendarRow;
+        Insert: EditorialCalendarInsert;
+        Update: EditorialCalendarUpdate;
         Relationships: [];
       };
       calendar_entries: {

@@ -156,6 +156,31 @@ export default async function ClientPage({ params }: PageProps) {
 
   const strategyStatus = (strategyCount ?? 0) > 0 ? 'approved' : inProgressStrategy ? 'in_review' : 'unlocked';
 
+  const { count: calendarCount } = await supabase
+    .from('editorial_calendars')
+    .select('id', { count: 'exact', head: true })
+    .eq('brand_profile_id', id)
+    .eq('agency_id', user.id)
+    .eq('status', 'approved');
+
+  const { data: pendingCalendar } = await supabase
+    .from('editorial_calendars')
+    .select('id')
+    .eq('brand_profile_id', id)
+    .eq('agency_id', user.id)
+    .eq('status', 'pending')
+    .limit(1)
+    .maybeSingle();
+
+  const calendarStatus =
+    strategyStatus !== 'approved'
+      ? 'locked'
+      : (calendarCount ?? 0) > 0
+        ? 'approved'
+        : pendingCalendar
+          ? 'in_review'
+          : 'unlocked';
+
   return (
     <main className="mx-auto max-w-3xl space-y-6 p-6">
       {/* Header */}
@@ -200,9 +225,14 @@ export default async function ClientPage({ params }: PageProps) {
             status={strategyStatus}
             href={strategyStatus === 'unlocked' || strategyStatus === 'in_review' ? `/clients/${id}/strategy/new` : undefined}
           />
-          <PipelineStep index={3} label="Copy" status="locked" />
-          <PipelineStep index={4} label="Visual Brief" status="locked" />
-          <PipelineStep index={5} label="Calendar" status="locked" />
+          <PipelineStep
+            index={3}
+            label="Calendar Agent"
+            status={calendarStatus}
+            href={calendarStatus === 'unlocked' || calendarStatus === 'in_review' ? `/clients/${id}/calendar` : undefined}
+          />
+          <PipelineStep index={4} label="Copy" status="locked" />
+          <PipelineStep index={5} label="Visual Brief" status="locked" />
           <PipelineStep index={6} label="Report" status="locked" />
         </div>
       </section>
