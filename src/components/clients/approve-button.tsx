@@ -34,6 +34,7 @@ export function ApproveButton({ profileId }: ApproveButtonProps) {
       if (dbError) throw new Error(dbError.message);
 
       router.refresh();
+      setIsApproving(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al aprobar');
       setIsApproving(false);
