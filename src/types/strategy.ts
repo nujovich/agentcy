@@ -37,7 +37,20 @@ export interface KPI {
   importance: KPIImportance;
 }
 
-export type StrategyStatus = 'pending' | 'approved' | 'rejected';
+export type ScenarioName = 'conservative' | 'balanced' | 'aggressive';
+
+export interface KPIScenario {
+  name: ScenarioName;
+  label: string;
+  description: string;
+  effort: string;
+  investment: string;
+  growth_rate: string;
+  kpis: KPI[];
+  realistic_reasoning: string;
+}
+
+export type StrategyStatus = 'calibration' | 'pending' | 'approved' | 'rejected';
 
 export interface Strategy {
   id: string;
@@ -48,6 +61,11 @@ export interface Strategy {
   channelStrategies: ChannelStrategy[];
   contentPillars: ContentPillar[];
   contentMix: StrategyContentMix;
+  currentFollowersData: Record<string, number> | null;
+  scenarioConservative: KPIScenario | null;
+  scenarioBalanced: KPIScenario | null;
+  scenarioAggressive: KPIScenario | null;
+  selectedScenario: ScenarioName | null;
   kpis: KPI[];
   postingFrequency: Record<string, string>;
   bestPostingTimes: Record<string, string[]>;

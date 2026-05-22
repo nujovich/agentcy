@@ -35,7 +35,7 @@ export default async function StrategyNewPage({ params }: PageProps) {
     .select('*')
     .eq('brand_profile_id', id)
     .eq('agency_id', user.id)
-    .in('status', ['pending', 'approved'])
+    .in('status', ['calibration', 'pending', 'approved'])
     .order('created_at', { ascending: false })
     .limit(1)
     .maybeSingle();

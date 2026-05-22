@@ -4,21 +4,23 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
+import { KPICalibrationPanel } from '@/components/strategy/kpi-calibration-panel';
 import { StrategyApproval } from '@/components/strategy/strategy-approval';
 import { StrategyGenerator } from '@/components/strategy/strategy-generator';
 import type { BrandProfile } from '@/types/brand-profile';
-import type { Strategy } from '@/types/strategy';
+import type { ScenarioName, Strategy } from '@/types/strategy';
 
 interface StrategyPageProps {
   profile: BrandProfile;
   initialStrategy: Strategy | null;
 }
 
-type PageState = 'generate' | 'loading' | 'review' | 'approved';
+type PageState = 'generate' | 'loading' | 'calibration' | 'review' | 'approved';
 
 function deriveInitialState(strategy: Strategy | null): PageState {
   if (!strategy) return 'generate';
   if (strategy.status === 'approved') return 'approved';
+  if (strategy.status === 'calibration') return 'calibration';
   return 'review';
 }
 
@@ -28,14 +30,17 @@ export function StrategyPage({ profile, initialStrategy }: StrategyPageProps) {
   const [state, setState] = useState<PageState>(() => deriveInitialState(initialStrategy));
   const [error, setError] = useState<string | null>(null);
 
-  const handleGenerate = async () => {
+  const handleGenerate = async (followersData: Record<string, number>) => {
     setState('loading');
     setError(null);
     try {
       const res = await fetch('/api/agents/strategy', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ brandProfileId: profile.id }),
+        body: JSON.stringify({
+          brandProfileId: profile.id,
+          currentFollowersData: followersData,
+        }),
       });
       const json: unknown = await res.json();
       if (!res.ok) {
@@ -46,10 +51,34 @@ export function StrategyPage({ profile, initialStrategy }: StrategyPageProps) {
         throw new Error(msg);
       }
       setStrategy(json as Strategy);
-      setState('review');
+      setState('calibration');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error desconocido');
       setState('generate');
+    }
+  };
+
+  const handleSelectScenario = async (scenario: ScenarioName) => {
+    if (!strategy) return;
+    setError(null);
+    try {
+      const res = await fetch(`/api/strategies/${strategy.id}/select-scenario`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ scenario }),
+      });
+      const json: unknown = await res.json();
+      if (!res.ok) {
+        const msg =
+          typeof json === 'object' && json !== null && 'error' in json
+            ? String((json as { error: unknown }).error)
+            : 'Error al seleccionar escenario';
+        throw new Error(msg);
+      }
+      setStrategy(json as Strategy);
+      setState('review');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al seleccionar escenario');
     }
   };
 
@@ -116,6 +145,11 @@ export function StrategyPage({ profile, initialStrategy }: StrategyPageProps) {
           profile={profile}
           onGenerate={handleGenerate}
           isLoading={state === 'loading'}
+        />
+      ) : state === 'calibration' && strategy ? (
+        <KPICalibrationPanel
+          strategy={strategy}
+          onSelectScenario={handleSelectScenario}
         />
       ) : state === 'review' && strategy ? (
         <StrategyApproval

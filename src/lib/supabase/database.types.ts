@@ -21,6 +21,8 @@ import type {
   ChannelStrategy,
   ContentPillar,
   KPI,
+  KPIScenario,
+  ScenarioName,
   Strategy,
   StrategyContentMix,
   StrategyObjectives,
@@ -111,6 +113,11 @@ export type StrategyRow = {
   channel_strategies: ChannelStrategy[];
   content_pillars: ContentPillar[];
   content_mix: StrategyContentMix;
+  current_followers_data: Record<string, number> | null;
+  scenario_conservative: KPIScenario | null;
+  scenario_balanced: KPIScenario | null;
+  scenario_aggressive: KPIScenario | null;
+  selected_scenario: ScenarioName | null;
   kpis: KPI[];
   posting_frequency: Record<string, string>;
   best_posting_times: Record<string, string[]>;
@@ -131,6 +138,11 @@ export type StrategyInsert = {
   channel_strategies: ChannelStrategy[];
   content_pillars: ContentPillar[];
   content_mix: StrategyContentMix;
+  current_followers_data?: Record<string, number> | null;
+  scenario_conservative?: KPIScenario | null;
+  scenario_balanced?: KPIScenario | null;
+  scenario_aggressive?: KPIScenario | null;
+  selected_scenario?: ScenarioName | null;
   kpis: KPI[];
   posting_frequency: Record<string, string>;
   best_posting_times: Record<string, string[]>;
@@ -154,6 +166,11 @@ export function dbToStrategy(row: StrategyRow): Strategy {
     channelStrategies: row.channel_strategies,
     contentPillars: row.content_pillars,
     contentMix: row.content_mix,
+    currentFollowersData: row.current_followers_data,
+    scenarioConservative: row.scenario_conservative,
+    scenarioBalanced: row.scenario_balanced,
+    scenarioAggressive: row.scenario_aggressive,
+    selectedScenario: row.selected_scenario,
     kpis: row.kpis,
     postingFrequency: row.posting_frequency,
     bestPostingTimes: row.best_posting_times,

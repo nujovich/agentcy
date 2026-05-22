@@ -3,7 +3,7 @@ import type { CSSProperties } from 'react';
 
 import { cn } from '@/lib/utils';
 
-type PipelineStatus = 'approved' | 'unlocked' | 'locked';
+type PipelineStatus = 'approved' | 'unlocked' | 'in_review' | 'locked';
 
 interface PipelineStepProps {
   label: string;
@@ -15,6 +15,7 @@ interface PipelineStepProps {
 const STATUS_LABEL: Record<PipelineStatus, string> = {
   approved: 'Aprobado',
   unlocked: 'Listo para generar',
+  in_review: 'Pendiente de aprobación',
   locked: 'Pendiente',
 };
 
@@ -30,6 +31,11 @@ const NODE_STYLE: Record<PipelineStatus, CSSProperties> = {
     color: 'var(--brand-accent-dark)',
     boxShadow: 'var(--shadow-glow-accent)',
   },
+  in_review: {
+    background: 'rgba(13,115,119,0.12)',
+    borderColor: 'var(--brand-primary)',
+    color: 'var(--brand-primary-dark)',
+  },
   locked: {
     background: 'var(--brand-surface-2)',
     borderColor: 'var(--brand-border)',
@@ -40,6 +46,7 @@ const NODE_STYLE: Record<PipelineStatus, CSSProperties> = {
 const STATUS_COLOR: Record<PipelineStatus, string> = {
   approved: 'var(--brand-success)',
   unlocked: 'var(--brand-accent-dark)',
+  in_review: 'var(--brand-primary-dark)',
   locked: 'var(--brand-ink-muted)',
 };
 
@@ -73,12 +80,12 @@ export function PipelineStep({
           </p>
         </div>
       </div>
-      {status === 'unlocked' && href ? (
+      {(status === 'unlocked' || status === 'in_review') && href ? (
         <Link
           href={href}
           className="inline-flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground shadow-sm transition-colors hover:bg-[var(--brand-primary-dark)] active:translate-y-px"
         >
-          Generar <span aria-hidden>→</span>
+          {status === 'in_review' ? 'Revisar' : 'Generar'} <span aria-hidden>→</span>
         </Link>
       ) : null}
     </div>

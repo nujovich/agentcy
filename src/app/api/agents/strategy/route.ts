@@ -8,7 +8,26 @@ import type { StrategyInsert } from '@/lib/supabase/database.types';
 import { createClient } from '@/lib/supabase/server';
 
 const bodySchema = z.object({
-  brandProfileId: z.string().uuid(),
+  brandProfileId: z.uuid(),
+  currentFollowersData: z.record(z.string(), z.number()).optional(),
+});
+
+const kpiSchema = z.object({
+  name: z.string(),
+  target: z.string(),
+  measurement: z.string(),
+  importance: z.enum(['critical', 'high', 'medium']),
+});
+
+const scenarioSchema = z.object({
+  name: z.enum(['conservative', 'balanced', 'aggressive']),
+  label: z.string(),
+  description: z.string(),
+  effort: z.string(),
+  investment: z.string(),
+  growth_rate: z.string(),
+  kpis: z.array(kpiSchema),
+  realistic_reasoning: z.string(),
 });
 
 const llmResponseSchema = z.object({
@@ -48,14 +67,9 @@ const llmResponseSchema = z.object({
     entertaining: z.number(),
     behind_the_scenes: z.number(),
   }),
-  kpis: z.array(
-    z.object({
-      name: z.string(),
-      target: z.string(),
-      measurement: z.string(),
-      importance: z.enum(['critical', 'high', 'medium']),
-    }),
-  ),
+  scenarioConservative: scenarioSchema,
+  scenarioBalanced: scenarioSchema,
+  scenarioAggressive: scenarioSchema,
   postingFrequency: z.record(z.string(), z.string()),
   bestPostingTimes: z.record(z.string(), z.array(z.string())),
   reasoning: z.string(),
@@ -94,7 +108,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const { brandProfileId } = parsed.data;
+  const { brandProfileId, currentFollowersData = {} } = parsed.data;
 
   const { data: profileRow, error: profileError } = await supabase
     .from('brand_profiles')
@@ -114,8 +128,8 @@ export async function POST(request: Request) {
     const provider = createProvider('anthropic', 'claude-opus-4-7');
     const { text } = await provider.generateText({
       system: STRATEGY_SYSTEM_PROMPT,
-      prompt: buildStrategyUserPrompt(profile),
-      maxTokens: 3000,
+      prompt: buildStrategyUserPrompt(profile, currentFollowersData),
+      maxTokens: 6000,
     });
 
     const cleaned = stripCodeFences(text);
@@ -129,12 +143,17 @@ export async function POST(request: Request) {
       channel_strategies: extracted.channelStrategies,
       content_pillars: extracted.contentPillars,
       content_mix: extracted.contentMix,
-      kpis: extracted.kpis,
+      current_followers_data: currentFollowersData,
+      scenario_conservative: extracted.scenarioConservative,
+      scenario_balanced: extracted.scenarioBalanced,
+      scenario_aggressive: extracted.scenarioAggressive,
+      selected_scenario: null,
+      kpis: extracted.scenarioBalanced.kpis,
       posting_frequency: extracted.postingFrequency,
       best_posting_times: extracted.bestPostingTimes,
       reasoning: extracted.reasoning,
       next_steps: extracted.next_steps,
-      status: 'pending',
+      status: 'calibration',
     };
 
     const { data: row, error: insertError } = await supabase

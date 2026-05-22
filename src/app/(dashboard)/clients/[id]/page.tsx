@@ -145,7 +145,16 @@ export default async function ClientPage({ params }: PageProps) {
     .eq('agency_id', user.id)
     .eq('status', 'approved');
 
-  const strategyStatus = (strategyCount ?? 0) > 0 ? 'approved' : 'unlocked';
+  const { data: inProgressStrategy } = await supabase
+    .from('strategies')
+    .select('id')
+    .eq('brand_profile_id', id)
+    .eq('agency_id', user.id)
+    .in('status', ['calibration', 'pending'])
+    .limit(1)
+    .maybeSingle();
+
+  const strategyStatus = (strategyCount ?? 0) > 0 ? 'approved' : inProgressStrategy ? 'in_review' : 'unlocked';
 
   return (
     <main className="mx-auto max-w-3xl space-y-6 p-6">
@@ -189,7 +198,7 @@ export default async function ClientPage({ params }: PageProps) {
             index={2}
             label="Strategy Agent"
             status={strategyStatus}
-            href={strategyStatus === 'unlocked' ? `/clients/${id}/strategy/new` : undefined}
+            href={strategyStatus === 'unlocked' || strategyStatus === 'in_review' ? `/clients/${id}/strategy/new` : undefined}
           />
           <PipelineStep index={3} label="Copy" status="locked" />
           <PipelineStep index={4} label="Visual Brief" status="locked" />
