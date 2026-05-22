@@ -105,8 +105,12 @@ export default function ChatIntakePage() {
           location: '',
         },
         content_pillars: profile.contentPillars,
-        competitors: [],
-        goals: [],
+        competitors: Array.isArray(extractedProfile.competitors)
+          ? (extractedProfile.competitors as string[])
+          : [],
+        goals: Array.isArray(extractedProfile.goals)
+          ? (extractedProfile.goals as string[])
+          : [],
         visual_kit: {
           primaryColors: [],
           secondaryColors: [],
@@ -168,6 +172,12 @@ export default function ChatIntakePage() {
         : {},
     contentPillars: Array.isArray(extractedProfile.contentPillars)
       ? (extractedProfile.contentPillars as string[])
+      : [],
+    competitors: Array.isArray(extractedProfile.competitors)
+      ? (extractedProfile.competitors as string[])
+      : [],
+    goals: Array.isArray(extractedProfile.goals)
+      ? (extractedProfile.goals as string[])
       : [],
   };
 

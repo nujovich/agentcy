@@ -17,9 +17,11 @@ CAMPOS A RECOPILAR (en este orden aproximado):
 5. targetAudience - audiencia principal
 6. toneOfVoice - tono de comunicación (formal, casual, técnico, creativo, inspirador, etc.)
 7. contentPillars - 2 a 4 pilares temáticos de contenido
-8. socialMedia.instagram - usuario de Instagram (si tienen)
-9. socialMedia.linkedin - perfil de LinkedIn (si tienen)
-10. socialMedia.tiktok - perfil de TikTok (si tienen)
+8. competitors - "¿Cuáles son sus principales competidores?"
+9. goals - "¿Cuáles son sus objetivos de comunicación o negocio?"
+10. socialMedia.instagram - usuario de Instagram (si tienen)
+11. socialMedia.linkedin - perfil de LinkedIn (si tienen)
+12. socialMedia.tiktok - perfil de TikTok (si tienen)
 
 EXTRACCIÓN:
 Después de cada respuesta del usuario, incluí en tu respuesta un bloque JSON con los valores extraídos:
@@ -28,8 +30,10 @@ Después de cada respuesta del usuario, incluí en tu respuesta un bloque JSON c
 Para campos anidados como socialMedia usa notación punto:
 {"field": "socialMedia.instagram", "value": "@usuario"}
 
-Para arrays como contentPillars:
+Para arrays como contentPillars, competitors, goals:
 {"field": "contentPillars", "value": ["pilar1", "pilar2"]}
+{"field": "competitors", "value": ["competidor1", "competidor2"]}
+{"field": "goals", "value": ["objetivo1", "objetivo2"]}
 
 TERMINACIÓN:
 - Cuando tengas clientName, industry, mainServices y targetAudience completos (mínimo), preguntá: "¿Hay algo más que deba saber sobre la marca antes de guardar el perfil?"
