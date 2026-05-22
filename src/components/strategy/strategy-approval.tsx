@@ -125,16 +125,12 @@ export function StrategyApproval({ strategy, onApprove, onReject }: StrategyAppr
               {strategy.kpis.map((kpi) => (
                 <div
                   key={kpi.name}
-                  className="flex items-start justify-between gap-4 border-b border-border pb-3 last:border-0 last:pb-0 text-sm"
+                  className="space-y-0.5 border-b border-border pb-3 last:border-0 last:pb-0 text-sm"
                 >
-                  <div className="space-y-0.5">
+                  <div className="flex items-center justify-between gap-2">
                     <p className="font-medium">{kpi.name}</p>
-                    <p className="text-xs text-muted-foreground">{kpi.measurement}</p>
-                  </div>
-                  <div className="text-right shrink-0">
-                    <p className="font-semibold">{kpi.target}</p>
                     <span
-                      className="font-mono text-[10px] uppercase tracking-wide"
+                      className="shrink-0 font-mono text-[10px] uppercase tracking-wide"
                       style={{
                         color:
                           kpi.importance === 'critical'
@@ -147,6 +143,8 @@ export function StrategyApproval({ strategy, onApprove, onReject }: StrategyAppr
                       {kpi.importance}
                     </span>
                   </div>
+                  <p className="font-semibold">{kpi.target}</p>
+                  <p className="text-xs text-muted-foreground">{kpi.measurement}</p>
                 </div>
               ))}
             </div>
