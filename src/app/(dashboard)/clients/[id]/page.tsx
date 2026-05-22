@@ -128,7 +128,7 @@ export default async function ClientPage({ params }: PageProps) {
         <section className="space-y-3">
           <ApproveButton profileId={profile.id} />
           <Link
-            href="/clients/new/manual"
+            href={`/clients/${profile.id}/edit`}
             className="block w-full rounded-lg border border-border px-4 py-2.5 text-center text-sm font-medium text-muted-foreground hover:border-foreground hover:text-foreground transition-colors"
           >
             Editar / completar campos
