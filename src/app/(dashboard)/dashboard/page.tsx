@@ -84,24 +84,29 @@ export default async function DashboardPage() {
             {profiles.map((p) => (
               <li
                 key={p.id}
-                className="flex items-center justify-between gap-4 px-5 py-4 transition-colors hover:bg-muted"
+                className="transition-colors hover:bg-muted"
               >
-                <div className="min-w-0">
-                  <p className="truncate font-heading text-sm font-semibold">
-                    {p.client_name}
-                  </p>
-                  <p className="truncate font-mono text-[11px] text-muted-foreground">
-                    {p.industry}
-                  </p>
-                </div>
-                <span
-                  className="rounded-full px-2.5 py-1 font-mono text-[11px] font-semibold uppercase tracking-[0.04em]"
-                  style={
-                    STATUS_STYLE[p.status] ?? STATUS_STYLE.draft
-                  }
+                <Link
+                  href={`/clients/${p.id}`}
+                  className="flex items-center justify-between gap-4 px-5 py-4"
                 >
-                  {STATUS_LABEL[p.status] ?? p.status}
-                </span>
+                  <div className="min-w-0">
+                    <p className="truncate font-heading text-sm font-semibold">
+                      {p.client_name}
+                    </p>
+                    <p className="truncate font-mono text-[11px] text-muted-foreground">
+                      {p.industry}
+                    </p>
+                  </div>
+                  <span
+                    className="rounded-full px-2.5 py-1 font-mono text-[11px] font-semibold uppercase tracking-[0.04em]"
+                    style={
+                      STATUS_STYLE[p.status] ?? STATUS_STYLE.draft
+                    }
+                  >
+                    {STATUS_LABEL[p.status] ?? p.status}
+                  </span>
+                </Link>
               </li>
             ))}
           </ul>
