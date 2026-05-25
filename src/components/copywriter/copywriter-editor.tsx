@@ -4,7 +4,7 @@ import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import type { CalendarPost } from '@/types/calendar';
-import { COPY_CHANNELS, type PostCopy, type CopywritingProject } from '@/types/copywriter';
+import type { PostCopy, CopywritingProject } from '@/types/copywriter';
 
 const VIDEO_FORMATS = new Set(['Reel', 'Video', 'Shorts']);
 
@@ -37,9 +37,7 @@ export function CopywriterEditor({
       return (
         found ?? {
           calendarPostId: p.id,
-          channel: (COPY_CHANNELS as readonly string[]).includes(p.channel)
-            ? (p.channel as PostCopy['channel'])
-            : COPY_CHANNELS[0],
+          channel: p.channel,
           hook: '',
           body: '',
           cta: '',

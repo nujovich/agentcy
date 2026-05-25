@@ -7,7 +7,7 @@ export type CopyAgencyStatus = 'pending' | 'approved' | 'rejected';
 // Zod schema for saving/editing copies (base — also used as PostCopy type source)
 export const postCopySaveSchema = z.object({
   calendarPostId: z.string().min(1),
-  channel: z.enum(COPY_CHANNELS),
+  channel: z.string().min(1),
   hook: z.string().min(1),
   body: z.string().min(1),
   cta: z.string().min(1),
