@@ -29,8 +29,7 @@ export function CalendarPage({ profile, strategy, initialCalendar }: CalendarPag
   const [state, setState] = useState<PageState>(() => deriveInitialState(initialCalendar));
   const [error, setError] = useState<string | null>(null);
   const [editingPost, setEditingPost] = useState<CalendarPost | null>(null);
-  const [rejectMode, setRejectMode] = useState(false);
-  const [rejectFeedback, setRejectFeedback] = useState('');
+  const [confirmReject, setConfirmReject] = useState(false);
   const [isActing, setIsActing] = useState(false);
 
   const shiftStartRef = useRef<HTMLInputElement>(null);
@@ -118,22 +117,19 @@ export function CalendarPage({ profile, strategy, initialCalendar }: CalendarPag
   };
 
   const handleReject = async () => {
-    if (!calendar || !rejectFeedback.trim()) return;
+    if (!calendar) return;
     setIsActing(true);
     setError(null);
     try {
       const res = await fetch(`/api/editorial-calendars/${calendar.id}/reject`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ feedback: rejectFeedback }),
       });
       if (!res.ok) {
         const json: unknown = await res.json();
         throw new Error((json as { error?: string }).error ?? 'Error al rechazar');
       }
       setCalendar({ ...calendar, agencyStatus: 'rejected' });
-      setRejectMode(false);
-      setRejectFeedback('');
+      setConfirmReject(false);
       setState('generate');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al rechazar');
@@ -303,7 +299,7 @@ export function CalendarPage({ profile, strategy, initialCalendar }: CalendarPag
               Pendiente
             </span>
           </div>
-          {!rejectMode ? (
+          {!confirmReject ? (
             <div className="flex gap-2">
               <Button size="sm" onClick={handleApprove} disabled={isActing || state === 'edit'}>
                 {isActing ? 'Aprobando...' : 'Aprobar calendario'}
@@ -311,34 +307,26 @@ export function CalendarPage({ profile, strategy, initialCalendar }: CalendarPag
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => setRejectMode(true)}
+                onClick={() => setConfirmReject(true)}
                 disabled={isActing}
               >
-                Rechazar con feedback
+                Rechazar
               </Button>
             </div>
           ) : (
-            <div className="space-y-2">
-              <textarea
-                value={rejectFeedback}
-                onChange={(e) => setRejectFeedback(e.target.value)}
-                rows={3}
-                placeholder="Ej: Necesito más posts de LinkedIn los martes..."
-                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-ring"
-              />
-              <div className="flex gap-2">
-                <Button
-                  size="sm"
-                  variant="destructive"
-                  onClick={handleReject}
-                  disabled={!rejectFeedback.trim() || isActing}
-                >
-                  {isActing ? 'Enviando...' : 'Enviar feedback y rechazar'}
-                </Button>
-                <Button size="sm" variant="outline" onClick={() => setRejectMode(false)}>
-                  Cancelar
-                </Button>
-              </div>
+            <div className="flex items-center gap-2">
+              <p className="text-xs text-muted-foreground">¿Confirmar rechazo? Volverá al estado de generación.</p>
+              <Button
+                size="sm"
+                variant="destructive"
+                onClick={handleReject}
+                disabled={isActing}
+              >
+                {isActing ? 'Rechazando...' : 'Confirmar rechazo'}
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => setConfirmReject(false)}>
+                Cancelar
+              </Button>
             </div>
           )}
           {state === 'edit' && (
