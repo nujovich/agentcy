@@ -161,14 +161,14 @@ export default async function ClientPage({ params }: PageProps) {
     .select('id', { count: 'exact', head: true })
     .eq('brand_profile_id', id)
     .eq('agency_id', user.id)
-    .eq('status', 'approved');
+    .eq('agency_status', 'approved');
 
   const { data: pendingCalendar } = await supabase
     .from('editorial_calendars')
     .select('id')
     .eq('brand_profile_id', id)
     .eq('agency_id', user.id)
-    .eq('status', 'pending')
+    .eq('agency_status', 'pending')
     .limit(1)
     .maybeSingle();
 
