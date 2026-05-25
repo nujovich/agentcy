@@ -36,7 +36,7 @@ export async function POST(request: Request, { params }: RouteContext) {
 
   const { error } = await supabase
     .from('editorial_calendars')
-    .update({ status: 'rejected' })
+    .update({ agency_status: 'rejected' })
     .eq('id', id)
     .eq('agency_id', user.id);
 
