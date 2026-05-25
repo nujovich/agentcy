@@ -110,24 +110,60 @@ export default function TrainingDashboard() {
   async function handleBuildDataset(agentName: string) {
     setBuildingDataset(agentName);
     try {
-      const res = await fetch('/api/datasets', {
+      const res = await fetch('/api/train', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           agentName,
+          provider: 'mock', // cambiar a 'together' cuando tengas API key
           includeRejected: false,
           creditAssignment: true,
           onlyProductiveSegments: true,
         }),
       });
       const result = await res.json();
-      alert(result.message);
+
+      if (res.ok) {
+        alert(`🧠 ${result.message}`);
+        // Empezar a pollear el estado del modelo
+        pollTrainingStatus(result.modelId);
+      } else {
+        alert(`❌ ${result.error ?? 'Error al entrenar'}`);
+      }
       fetchData();
     } catch (err) {
-      alert('Error al construir dataset');
+      alert('Error al conectar con el servidor');
     } finally {
       setBuildingDataset(null);
     }
+  }
+
+  // Polling: cada 3s revisa el estado del entrenamiento
+  const [pollingModelId, setPollingModelId] = useState<string | null>(null);
+  const [trainingProgress, setTrainingProgress] = useState<number>(0);
+  const [trainingStep, setTrainingStep] = useState<string>('');
+
+  function pollTrainingStatus(modelId: string) {
+    setPollingModelId(modelId);
+    setTrainingProgress(0);
+
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetch(`/api/train?modelId=${modelId}`);
+        const model = await res.json();
+        if (model.metadata?.progress) setTrainingProgress(model.metadata.progress);
+        if (model.metadata?.current_step) setTrainingStep(model.metadata.current_step);
+
+        if (model.status === 'active' || model.status === 'failed') {
+          clearInterval(interval);
+          setPollingModelId(null);
+          fetchData();
+        }
+      } catch {
+        clearInterval(interval);
+        setPollingModelId(null);
+      }
+    }, 3000);
   }
 
   function getStatusBadge(status: ModelStatus['trainingStatus']) {
@@ -261,7 +297,19 @@ export default function TrainingDashboard() {
 
                     {/* Action */}
                     <td className="p-4">
-                      {model.trainingStatus === 'ready' && (
+                      {pollingModelId && model.agentName === pollingModelId ? (
+                        <div className="space-y-1">
+                          <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden w-24">
+                            <div
+                              className="h-full bg-violet-500 rounded-full animate-pulse"
+                              style={{ width: `${trainingProgress}%` }}
+                            />
+                          </div>
+                          <p className="text-[10px] text-violet-400 truncate max-w-[140px]">
+                            {trainingStep || 'Entrenando...'} {trainingProgress}%
+                          </p>
+                        </div>
+                      ) : model.trainingStatus === 'ready' ? (
                         <button
                           onClick={() => handleBuildDataset(model.agentName)}
                           disabled={buildingDataset === model.agentName}
