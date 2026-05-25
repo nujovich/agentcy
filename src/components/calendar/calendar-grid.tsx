@@ -156,14 +156,14 @@ export function CalendarGrid({ posts, startDate, endDate, onPostsChange, onEditP
                   className={`
                     min-h-[120px] rounded-lg border p-1.5 transition-colors
                     ${inRange ? 'bg-card border-border' : 'bg-muted/30 border-transparent'}
-                    ${today ? 'ring-2 ring-violet-500/30 border-violet-500/50' : ''}
-                    ${isOver ? 'bg-violet-500/10 border-violet-500/50' : ''}
+                    ${today ? 'ring-2 ring-[var(--brand-primary)]/30 border-[var(--brand-primary)]/50' : ''}
+                    ${isOver ? 'bg-[var(--brand-primary-soft)] border-[var(--brand-primary)]/50' : ''}
                   `}
                 >
                   {/* Day header */}
                   <div className={`
                     text-[10px] font-medium mb-1 px-1 py-0.5 rounded
-                    ${today ? 'bg-violet-500/20 text-violet-400' : 'text-muted-foreground'}
+                    ${today ? 'bg-[var(--brand-primary-soft)] text-[var(--brand-primary)]' : 'text-muted-foreground'}
                   `}>
                     {formatDayNumber(day)}
                   </div>

@@ -219,7 +219,7 @@ export function CalendarPage({ profile, strategy, initialCalendar }: CalendarPag
           </p>
         </header>
         {error && (
-          <div className="rounded-lg bg-rose-500/10 border border-rose-500/20 p-3 text-sm text-rose-400">
+          <div className="rounded-lg bg-[var(--brand-danger-soft)] border border-[var(--brand-danger)]/30 p-3 text-sm" style={{ color: 'var(--brand-danger)' }}>
             {error}
           </div>
         )}
@@ -237,7 +237,7 @@ export function CalendarPage({ profile, strategy, initialCalendar }: CalendarPag
   if (state === 'loading') {
     return (
       <div className="flex flex-col items-center justify-center py-20 space-y-4">
-        <div className="w-12 h-12 border-2 border-violet-400 border-t-transparent rounded-full animate-spin" />
+        <div className="w-12 h-12 border-2 border-[var(--brand-primary)] border-t-transparent rounded-full animate-spin" />
         <p className="text-sm text-muted-foreground">Generando calendario con IA...</p>
       </div>
     );
@@ -277,7 +277,7 @@ export function CalendarPage({ profile, strategy, initialCalendar }: CalendarPag
       </div>
 
       {error && (
-        <div className="rounded-lg bg-rose-500/10 border border-rose-500/20 p-3 text-sm text-rose-400">
+        <div className="rounded-lg bg-[var(--brand-danger-soft)] border border-[var(--brand-danger)]/30 p-3 text-sm" style={{ color: 'var(--brand-danger)' }}>
           {error}
         </div>
       )}
@@ -295,7 +295,7 @@ export function CalendarPage({ profile, strategy, initialCalendar }: CalendarPag
         <div className="rounded-lg border border-border bg-card p-4 space-y-3">
           <div className="flex items-center justify-between">
             <p className="text-sm font-medium">Revisión de agencia</p>
-            <span className="text-xs bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 rounded-full px-2 py-0.5">
+            <span className="text-xs bg-[var(--brand-warning-soft)] border border-[var(--brand-warning)]/30 rounded-full px-2 py-0.5" style={{ color: 'var(--brand-warning)' }}>
               Pendiente
             </span>
           </div>
@@ -342,7 +342,7 @@ export function CalendarPage({ profile, strategy, initialCalendar }: CalendarPag
         <div className="rounded-lg border border-border bg-card p-4 space-y-3">
           <div className="flex items-center justify-between flex-wrap gap-2">
             <div className="flex items-center gap-2">
-              <span className="text-xs bg-violet-500/20 text-violet-400 border border-violet-500/30 rounded-full px-2 py-0.5">
+              <span className="text-xs bg-[var(--brand-success-soft)] border border-[var(--brand-success)]/30 rounded-full px-2 py-0.5" style={{ color: 'var(--brand-success)' }}>
                 Aprobado por agencia
               </span>
               <span className="text-xs bg-zinc-700 text-zinc-300 border border-zinc-600 rounded-full px-2 py-0.5">

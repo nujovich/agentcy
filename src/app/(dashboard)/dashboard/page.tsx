@@ -74,16 +74,16 @@ export default async function DashboardPage() {
 
       <Link
         href="/training"
-        className="block rounded-lg border border-violet-500/20 bg-violet-500/5 p-4 hover:bg-violet-500/10 transition-colors"
+        className="block rounded-lg border border-brand-primary/20 bg-brand-primary/[0.04] p-4 hover:bg-brand-primary/[0.08] transition-colors"
       >
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm font-medium text-violet-400">🧠 Entrenamiento de modelos</p>
+            <p className="text-sm font-semibold" style={{ color: 'var(--brand-primary)' }}>Entrenamiento de modelos</p>
             <p className="text-xs text-muted-foreground mt-0.5">
             Gestioná los modelos de IA de tus agentes. Recolectá trayectorias y entrená tu propio modelo personalizado.
             </p>
           </div>
-          <span className="text-xs text-violet-400">→</span>
+          <span className="text-xs" style={{ color: 'var(--brand-primary)' }}>→</span>
         </div>
       </Link>
 

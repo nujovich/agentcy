@@ -91,7 +91,7 @@ export async function POST(request: Request) {
       modelId,
       modelName,
       status: 'training',
-      message: `🧠 Entrenamiento iniciado para ${agentName}. ${examples.length} trayectorias. Modelo: ${modelName}.`,
+      message: `Entrenamiento iniciado para ${agentName}. ${examples.length} trayectorias. Modelo: ${modelName}.`,
       stats,
     });
   } catch (err) {

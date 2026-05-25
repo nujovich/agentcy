@@ -132,11 +132,11 @@ export default function TrainingDashboard() {
       const result = await res.json();
 
       if (res.ok) {
-        alert(`🧠 ${result.message}`);
+        alert(`✓ ${result.message}`);
         // Empezar a pollear el estado del modelo
         pollTrainingStatus(result.modelId);
       } else {
-        alert(`❌ ${result.error ?? 'Error al entrenar'}`);
+        alert(`✗ ${result.error ?? 'Error al entrenar'}`);
       }
       fetchData();
     } catch {
@@ -177,37 +177,37 @@ export default function TrainingDashboard() {
   function getStatusBadge(status: ModelStatus['trainingStatus']) {
     const styles = {
       collecting: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
-      ready: 'bg-green-500/20 text-green-400 border-green-500/30',
-      training: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-      active: 'bg-violet-500/20 text-violet-400 border-violet-500/30',
-    };
+      ready: 'bg-[var(--brand-success-soft)] border border-[var(--brand-success)]/30',
+      training: 'bg-[var(--brand-primary-soft)] border border-[var(--brand-primary)]/30',
+      active: 'bg-[var(--brand-success-soft)] border border-[var(--brand-success)]/30',
+    } as const;
     const labels = {
       collecting: 'Recolectando datos',
       ready: 'Listo para entrenar',
       training: 'Entrenando...',
-      active: 'Modelo activo 🧠',
-    };
+      active: 'Modelo activo',
+    } as const;
 
     return (
       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${styles[status]}`}>
-        {status === 'active' && <span className="w-1.5 h-1.5 bg-violet-400 rounded-full mr-1.5 animate-pulse" />}
-        {status === 'ready' && <span className="w-1.5 h-1.5 bg-green-400 rounded-full mr-1.5" />}
+        {status === 'active' && <span className="w-1.5 h-1.5 bg-[var(--brand-success)] rounded-full mr-1.5" />}
+        {status === 'ready' && <span className="w-1.5 h-1.5 bg-[var(--brand-success)] rounded-full mr-1.5" />}
         {labels[status]}
       </span>
     );
   }
 
   function getProgressColor(percent: number) {
-    if (percent >= 100) return 'bg-violet-500';
-    if (percent >= 60) return 'bg-green-500';
-    if (percent >= 30) return 'bg-yellow-500';
+    if (percent >= 100) return 'bg-[var(--brand-success)]';
+    if (percent >= 60) return 'bg-[var(--brand-primary-light)]';
+    if (percent >= 30) return 'bg-[var(--brand-warning)]';
     return 'bg-zinc-600';
   }
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-2 border-violet-400 border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-[var(--brand-primary)] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -235,7 +235,7 @@ export default function TrainingDashboard() {
       {/* Tabla de agentes */}
       <div className="rounded-lg border border-border bg-card">
         <header className="border-b border-border p-4">
-          <h2 className="text-lg font-medium">🧠 Estado de entrenamiento por agente</h2>
+          <h2 className="text-lg font-medium">Estado de entrenamiento por agente</h2>
           <p className="text-xs text-muted-foreground mt-1">
             Cada agente recolecta trayectorias. Con 50+ aprobadas, puedes entrenar un modelo 4B
             personalizado que reemplace a Claude/GPT.
@@ -271,12 +271,12 @@ export default function TrainingDashboard() {
                       >
                         {model.trainingStatus === 'active' && model.fineTunedModelName ? (
                           <option value={model.fineTunedModelName}>
-                            🧠 {model.fineTunedModelName} (score: {model.qualityScore ?? 'N/A'})
+                            {model.fineTunedModelName} (score: {model.qualityScore ?? 'N/A'})
                           </option>
                         ) : null}
                         {MODEL_OPTIONS.map((opt) => (
                           <option key={opt.value} value={opt.value}>
-                            {opt.provider === 'anthropic' ? '🤖' : opt.provider === 'openai' ? '💬' : '🔷'} {opt.label}
+                            {opt.provider === 'anthropic' ? '' : opt.provider === 'openai' ? '' : ''} {opt.label}
                           </option>
                         ))}
                       </select>
@@ -309,11 +309,11 @@ export default function TrainingDashboard() {
                         <div className="space-y-1">
                           <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden w-24">
                             <div
-                              className="h-full bg-violet-500 rounded-full animate-pulse"
+                              className="h-full bg-[var(--brand-primary)] rounded-full"
                               style={{ width: `${trainingProgress}%` }}
                             />
                           </div>
-                          <p className="text-[10px] text-violet-400 truncate max-w-[140px]">
+                          <p className="text-[10px]" style={{ color: 'var(--brand-primary)' }}>
                             {trainingStep || 'Entrenando...'} {trainingProgress}%
                           </p>
                         </div>
@@ -329,7 +329,7 @@ export default function TrainingDashboard() {
                               Construyendo...
                             </>
                           ) : (
-                            '🎯 Entrenar modelo'
+                            'Entrenar modelo'
                           )}
                         </button>
                       ) : null}
@@ -341,7 +341,7 @@ export default function TrainingDashboard() {
                       {model.trainingStatus === 'active' && (
                         <button
                           onClick={() => handleModelChange(model.agentName, 'claude-sonnet-4-6')}
-                          className="text-xs text-violet-400 hover:text-violet-300"
+                          className="text-xs underline hover:no-underline" style={{ color: 'var(--brand-primary)' }}
                         >
                           Cambiar a Claude
                         </button>
@@ -357,26 +357,26 @@ export default function TrainingDashboard() {
 
       {/* Explicación del ciclo */}
       <div className="rounded-lg border border-border bg-card p-4">
-        <h3 className="text-sm font-medium mb-2">🔄 Cómo funciona</h3>
+        <h3 className="text-sm font-medium mb-2">Cómo funciona</h3>
         <div className="grid grid-cols-4 gap-4 text-xs text-muted-foreground">
           <div className="text-center">
-            <div className="text-2xl mb-1">📝</div>
-            <p className="font-medium text-foreground">1. Usa los agentes</p>
+            <div className="font-mono text-lg font-semibold mb-1" style={{ color: 'var(--brand-primary)' }}>1</div>
+            <p className="font-medium text-foreground">Usa los agentes</p>
             <p>Genera estrategias, calendarios y copies con Claude</p>
           </div>
           <div className="text-center">
-            <div className="text-2xl mb-1">📊</div>
-            <p className="font-medium text-foreground">2. Acumula trayectorias</p>
+            <div className="font-mono text-lg font-semibold mb-1" style={{ color: 'var(--brand-primary-light)' }}>2</div>
+            <p className="font-medium text-foreground">Acumula trayectorias</p>
             <p>Cada interacción se guarda como dato de entrenamiento</p>
           </div>
           <div className="text-center">
-            <div className="text-2xl mb-1">🧬</div>
-            <p className="font-medium text-foreground">3. Entrena modelo 4B</p>
+            <div className="font-mono text-lg font-semibold mb-1" style={{ color: 'var(--brand-accent)' }}>3</div>
+            <p className="font-medium text-foreground">Entrena modelo 4B</p>
             <p>Con 50+ trayectorias, fine-tuneamos un modelo pequeño</p>
           </div>
           <div className="text-center">
-            <div className="text-2xl mb-1">🚀</div>
-            <p className="font-medium text-foreground">4. Selecciona tu modelo</p>
+            <div className="font-mono text-lg font-semibold mb-1" style={{ color: 'var(--brand-primary)' }}>4</div>
+            <p className="font-medium text-foreground">Selecciona tu modelo</p>
             <p>Cambia de Claude a tu modelo personalizado</p>
           </div>
         </div>
