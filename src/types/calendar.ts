@@ -1,7 +1,8 @@
 export type CalendarChannel = string;
 export type CalendarFormat = string;
 export type CalendarContentType = 'image' | 'video' | 'text' | 'mixed';
-export type CalendarStatus = 'pending' | 'approved' | 'rejected';
+export type AgencyCalendarStatus = 'pending' | 'approved' | 'rejected';
+export type ClientCalendarStatus = 'not_shared' | 'pending' | 'approved' | 'rejected';
 
 export interface CalendarPost {
   id: string;
@@ -24,13 +25,14 @@ export interface EditorialCalendar {
   strategyId: string | null;
   brandProfileId: string;
   agencyId: string;
-  month: string;
-  year: number;
+  campaignStart: string;  // YYYY-MM-DD
+  campaignEnd: string;    // YYYY-MM-DD
   posts: CalendarPost[];
   totalPosts: number;
   postsByChannel: Record<string, number>;
   pillarDistribution: Record<string, number>;
-  status: CalendarStatus;
+  agencyStatus: AgencyCalendarStatus;
+  clientStatus: ClientCalendarStatus;
   createdAt: string;
   updatedAt: string;
 }
