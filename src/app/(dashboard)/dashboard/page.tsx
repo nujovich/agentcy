@@ -72,7 +72,22 @@ export default async function DashboardPage() {
         </Button>
       </header>
 
-      <section className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+      <Link
+        href="/training"
+        className="block rounded-lg border border-violet-500/20 bg-violet-500/5 p-4 hover:bg-violet-500/10 transition-colors"
+      >
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-medium text-violet-400">🧠 Entrenamiento de modelos</p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+            Gestioná los modelos de IA de tus agentes. Recolectá trayectorias y entrená tu propio modelo personalizado.
+            </p>
+          </div>
+          <span className="text-xs text-violet-400">→</span>
+        </div>
+      </Link>
+
+      <section className="rounded-lg border border-border bg-card">
         <header className="flex items-baseline justify-between border-b border-border px-5 py-4">
           <h2 className="text-base font-semibold">Brand Profiles</h2>
           <span className="font-mono text-[11px] text-muted-foreground">
