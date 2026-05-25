@@ -101,8 +101,10 @@ export function CopywriterPage({
       const res = await fetch(`/api/copywriting-projects/${project.id}/reject`, {
         method: 'POST',
       });
+      const json: unknown = await res.json();
       if (!res.ok) {
-        throw new Error('Error al rechazar');
+        const msg = (json as { error?: string }).error ?? 'Error al rechazar';
+        throw new Error(msg);
       }
       setProject(null);
       setState('generate');
@@ -118,7 +120,7 @@ export function CopywriterPage({
           className="rounded-lg border px-4 py-3 text-sm"
           style={{
             borderColor: 'var(--brand-error, #ef4444)',
-            background: 'rgba(239,68,68,0.08)',
+            background: 'var(--brand-error-soft, rgba(239,68,68,0.08))',
             color: 'var(--brand-error, #ef4444)',
           }}
         >
