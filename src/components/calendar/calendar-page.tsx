@@ -3,9 +3,9 @@
 import { useState } from 'react';
 import Link from 'next/link';
 
-import { CalendarApprovalPanel } from '@/components/calendar/calendar-approval-panel';
-import { CalendarEditor } from '@/components/calendar/calendar-editor';
-import { CalendarGenerator } from '@/components/calendar/calendar-generator';
+import { CalendarGrid } from '@/components/calendar/calendar-grid';
+import { DateRangePicker } from '@/components/calendar/date-range-picker';
+import { Button } from '@/components/ui/button';
 import type { BrandProfile } from '@/types/brand-profile';
 import type { CalendarPost, EditorialCalendar } from '@/types/calendar';
 import type { Strategy } from '@/types/strategy';
@@ -24,17 +24,24 @@ function deriveInitialState(calendar: EditorialCalendar | null): PageState {
   return 'review';
 }
 
-function extractErrorMessage(json: unknown, fallback: string): string {
-  if (typeof json === 'object' && json !== null && 'error' in json) {
-    return String((json as { error: unknown }).error);
-  }
-  return fallback;
-}
-
 export function CalendarPage({ profile, strategy, initialCalendar }: CalendarPageProps) {
   const [calendar, setCalendar] = useState<EditorialCalendar | null>(initialCalendar);
   const [state, setState] = useState<PageState>(() => deriveInitialState(initialCalendar));
   const [error, setError] = useState<string | null>(null);
+  const [editingPost, setEditingPost] = useState<CalendarPost | null>(null);
+
+  // Date range state
+  const now = new Date();
+  const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+  const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+  const [startDate, setStartDate] = useState(firstDay.toISOString().slice(0, 10));
+  const [endDate, setEndDate] = useState(lastDay.toISOString().slice(0, 10));
+
+  // Post editor state
+  const [editHeadline, setEditHeadline] = useState('');
+  const [editDescription, setEditDescription] = useState('');
+  const [editCta, setEditCta] = useState('');
+  const [editNotes, setEditNotes] = useState('');
 
   const handleGenerate = async () => {
     setState('loading');
@@ -46,12 +53,12 @@ export function CalendarPage({ profile, strategy, initialCalendar }: CalendarPag
         body: JSON.stringify({
           brandProfileId: profile.id,
           strategyId: strategy.id,
+          startDate,
+          endDate,
         }),
       });
-      const json: unknown = await res.json();
-      if (!res.ok) {
-        throw new Error(extractErrorMessage(json, 'Error al generar el calendario'));
-      }
+      const json: any = await res.json();
+      if (!res.ok) throw new Error(json?.error ?? 'Error al generar el calendario');
       setCalendar(json as EditorialCalendar);
       setState('review');
     } catch (err) {
@@ -69,10 +76,8 @@ export function CalendarPage({ profile, strategy, initialCalendar }: CalendarPag
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ posts }),
       });
-      const json: unknown = await res.json();
-      if (!res.ok) {
-        throw new Error(extractErrorMessage(json, 'Error al guardar los cambios'));
-      }
+      const json: any = await res.json();
+      if (!res.ok) throw new Error(json?.error ?? 'Error al guardar');
       setCalendar(json as EditorialCalendar);
       setState('review');
     } catch (err) {
@@ -80,90 +85,157 @@ export function CalendarPage({ profile, strategy, initialCalendar }: CalendarPag
     }
   };
 
-  const handleApprove = async () => {
+  const handlePostsChange = (updated: CalendarPost[]) => {
     if (!calendar) return;
-    setError(null);
-    try {
-      const res = await fetch(`/api/editorial-calendars/${calendar.id}/approve`, {
-        method: 'POST',
-      });
-      if (!res.ok) {
-        const json: unknown = await res.json();
-        throw new Error(extractErrorMessage(json, 'Error al aprobar'));
-      }
-      setState('approved');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al aprobar');
-    }
+    setCalendar({ ...calendar, posts: updated });
+    setState('edit');
   };
 
-  const handleReject = async (feedback: string) => {
-    if (!calendar) return;
-    setError(null);
-    try {
-      const res = await fetch(`/api/editorial-calendars/${calendar.id}/reject`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ feedback }),
-      });
-      if (!res.ok) {
-        const json: unknown = await res.json();
-        throw new Error(extractErrorMessage(json, 'Error al rechazar'));
-      }
-      setCalendar(null);
-      setState('generate');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al rechazar');
-    }
+  const openPostEditor = (post: CalendarPost) => {
+    setEditingPost(post);
+    setEditHeadline(post.headline);
+    setEditDescription(post.description);
+    setEditCta(post.cta);
+    setEditNotes(post.notes ?? '');
   };
+
+  const saveEditedPost = () => {
+    if (!editingPost || !calendar) return;
+    const updated = calendar.posts.map((p) =>
+      p.id === editingPost.id
+        ? { ...p, headline: editHeadline, description: editDescription, cta: editCta, notes: editNotes || undefined }
+        : p
+    );
+    setCalendar({ ...calendar, posts: updated });
+    setEditingPost(null);
+    setState('edit');
+  };
+
+  if (state === 'generate') {
+    return (
+      <div className="space-y-6">
+        <header>
+          <h1 className="text-2xl font-semibold">📅 Calendario editorial</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            {profile.clientName} · {strategy.month ?? new Date().toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}
+          </p>
+        </header>
+
+        <DateRangePicker
+          startDate={startDate}
+          endDate={endDate}
+          onChange={(s, e) => { setStartDate(s); setEndDate(e); }}
+          onGenerate={handleGenerate}
+          loading={state === 'loading'}
+        />
+      </div>
+    );
+  }
+
+  if (state === 'loading') {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 space-y-4">
+        <div className="w-12 h-12 border-2 border-violet-400 border-t-transparent rounded-full animate-spin" />
+        <p className="text-sm text-muted-foreground">Generando calendario con IA...</p>
+      </div>
+    );
+  }
+
+  if (!calendar) return null;
 
   return (
-    <main className="mx-auto max-w-4xl space-y-6 p-6">
-      <Link
-        href={`/clients/${profile.id}`}
-        className="text-xs text-muted-foreground hover:underline"
-      >
-        ← Volver al cliente
-      </Link>
-
-      {error ? (
-        <p className="rounded-md border border-destructive/30 bg-destructive/10 px-4 py-2 text-sm text-destructive">
-          {error}
-        </p>
-      ) : null}
-
-      {state === 'generate' || state === 'loading' ? (
-        <CalendarGenerator
-          profile={profile}
-          strategy={strategy}
-          onGenerate={handleGenerate}
-          isLoading={state === 'loading'}
-        />
-      ) : state === 'edit' && calendar ? (
-        <CalendarEditor calendar={calendar} onSave={handleSave} />
-      ) : state === 'review' && calendar ? (
-        <CalendarApprovalPanel
-          calendar={calendar}
-          onApprove={handleApprove}
-          onReject={handleReject}
-          onEdit={() => setState('edit')}
-        />
-      ) : state === 'approved' ? (
-        <div className="space-y-4 py-12 text-center">
-          <p className="text-2xl font-semibold" style={{ color: 'var(--brand-success)' }}>
-            Calendario aprobado
-          </p>
+    <div className="space-y-4">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold">📅 Calendario editorial</h1>
           <p className="text-sm text-muted-foreground">
-            El Copywriter Agent generará el texto completo para cada post.
+            {profile.clientName} · {calendar.posts.length} publicaciones
+            {calendar.posts.length > 0 && ` · ${new Date(calendar.posts[0].date).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}`}
           </p>
-          <Link
-            href={`/clients/${profile.id}`}
-            className="inline-block rounded-lg bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
-          >
-            Volver al cliente →
-          </Link>
         </div>
-      ) : null}
-    </main>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" asChild>
+            <Link href={`/clients/${profile.id}`}>Volver</Link>
+          </Button>
+          {state === 'edit' && (
+            <Button size="sm" onClick={() => handleSave(calendar.posts)}>
+              💾 Guardar cambios
+            </Button>
+          )}
+        </div>
+      </div>
+
+      {error && (
+        <div className="rounded-lg bg-rose-500/10 border border-rose-500/20 p-3 text-sm text-rose-400">
+          {error}
+        </div>
+      )}
+
+      {/* Stats bar */}
+      <div className="flex gap-4 text-xs text-muted-foreground">
+        <span>📊 {calendar.totalPosts} publicaciones</span>
+        {Object.entries(calendar.postsByChannel ?? {}).map(([ch, count]) => (
+          <span key={ch}>{ch}: {count}</span>
+        ))}
+      </div>
+
+      {/* Calendar Grid with drag & drop */}
+      {state !== 'approved' ? (
+        <CalendarGrid
+          posts={calendar.posts}
+          startDate={startDate}
+          endDate={endDate}
+          onPostsChange={handlePostsChange}
+          onEditPost={openPostEditor}
+        />
+      ) : (
+        <CalendarGrid
+          posts={calendar.posts}
+          startDate={startDate}
+          endDate={endDate}
+          onPostsChange={() => {}}
+          onEditPost={() => {}}
+        />
+      )}
+
+      {/* Post Editor Modal */}
+      {editingPost && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setEditingPost(null)}>
+          <div className="bg-card border border-border rounded-xl p-6 w-full max-w-lg space-y-4" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-sm font-medium">✏️ Editar publicación</h3>
+
+            <label className="block space-y-1">
+              <span className="text-xs text-muted-foreground">Titular</span>
+              <input value={editHeadline} onChange={(e) => setEditHeadline(e.target.value)}
+                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-ring" />
+            </label>
+
+            <label className="block space-y-1">
+              <span className="text-xs text-muted-foreground">Descripción</span>
+              <textarea value={editDescription} onChange={(e) => setEditDescription(e.target.value)} rows={3}
+                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-ring" />
+            </label>
+
+            <label className="block space-y-1">
+              <span className="text-xs text-muted-foreground">CTA</span>
+              <input value={editCta} onChange={(e) => setEditCta(e.target.value)}
+                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-ring" />
+            </label>
+
+            <label className="block space-y-1">
+              <span className="text-xs text-muted-foreground">Notas visuales</span>
+              <textarea value={editNotes} onChange={(e) => setEditNotes(e.target.value)} rows={2}
+                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-ring" />
+            </label>
+
+            <div className="flex justify-end gap-2 pt-2">
+              <Button variant="outline" size="sm" onClick={() => setEditingPost(null)}>Cancelar</Button>
+              <Button size="sm" onClick={saveEditedPost}>💾 Guardar</Button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
