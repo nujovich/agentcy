@@ -17,6 +17,23 @@ import type {
   VisualBriefTypography,
   VisualKit,
 } from '@/types/brand-profile';
+import type {
+  ChannelStrategy,
+  ContentPillar,
+  KPI,
+  KPIScenario,
+  ScenarioName,
+  Strategy,
+  StrategyContentMix,
+  StrategyObjectives,
+  StrategyStatus,
+} from '@/types/strategy';
+import type {
+  AgencyCalendarStatus,
+  CalendarPost,
+  ClientCalendarStatus,
+  EditorialCalendar,
+} from '@/types/calendar';
 
 export type Json =
   | string
@@ -92,6 +109,85 @@ export type BrandProfileInsert = {
 }
 
 export type BrandProfileUpdate = Partial<BrandProfileInsert>;
+
+export type StrategyRow = {
+  id: string;
+  brand_profile_id: string;
+  agency_id: string;
+  objectives: StrategyObjectives;
+  primary_channels: string[];
+  channel_strategies: ChannelStrategy[];
+  content_pillars: ContentPillar[];
+  content_mix: StrategyContentMix;
+  current_followers_data: Record<string, number> | null;
+  scenario_conservative: KPIScenario | null;
+  scenario_sustainable: KPIScenario | null;
+  scenario_aggressive: KPIScenario | null;
+  selected_scenario: ScenarioName | null;
+  kpis: KPI[];
+  posting_frequency: Record<string, string>;
+  best_posting_times: Record<string, string[]>;
+  reasoning: string;
+  next_steps: string;
+  feedback: string | null;
+  status: StrategyStatus;
+  created_at: string;
+  updated_at: string;
+};
+
+export type StrategyInsert = {
+  id?: string;
+  brand_profile_id: string;
+  agency_id: string;
+  objectives: StrategyObjectives;
+  primary_channels: string[];
+  channel_strategies: ChannelStrategy[];
+  content_pillars: ContentPillar[];
+  content_mix: StrategyContentMix;
+  current_followers_data?: Record<string, number> | null;
+  scenario_conservative?: KPIScenario | null;
+  scenario_sustainable?: KPIScenario | null;
+  scenario_aggressive?: KPIScenario | null;
+  selected_scenario?: ScenarioName | null;
+  kpis: KPI[];
+  posting_frequency: Record<string, string>;
+  best_posting_times: Record<string, string[]>;
+  reasoning: string;
+  next_steps: string;
+  feedback?: string | null;
+  status?: StrategyStatus;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type StrategyUpdate = Partial<StrategyInsert>;
+
+export function dbToStrategy(row: StrategyRow): Strategy {
+  return {
+    id: row.id,
+    brandProfileId: row.brand_profile_id,
+    agencyId: row.agency_id,
+    objectives: row.objectives,
+    primaryChannels: row.primary_channels,
+    channelStrategies: row.channel_strategies,
+    contentPillars: row.content_pillars,
+    contentMix: row.content_mix,
+    currentFollowersData: row.current_followers_data,
+    scenarioConservative: row.scenario_conservative,
+    scenarioSustainable: row.scenario_sustainable,
+    scenarioAggressive: row.scenario_aggressive,
+    selectedScenario: row.selected_scenario,
+    kpis: row.kpis,
+    postingFrequency: row.posting_frequency,
+    bestPostingTimes: row.best_posting_times,
+    reasoning: row.reasoning,
+    nextSteps: row.next_steps,
+    feedback: row.feedback,
+    status: row.status,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
 
 export type StrategyDocRow = {
   id: string;
@@ -245,6 +341,61 @@ export type MonthlyReportInsert = {
 
 export type MonthlyReportUpdate = Partial<MonthlyReportInsert>;
 
+export type EditorialCalendarRow = {
+  id: string;
+  strategy_id: string | null;
+  brand_profile_id: string;
+  agency_id: string;
+  campaign_start: string;
+  campaign_end: string;
+  posts: CalendarPost[];
+  total_posts: number;
+  posts_by_channel: Record<string, number>;
+  pillar_distribution: Record<string, number>;
+  agency_status: AgencyCalendarStatus;
+  client_status: ClientCalendarStatus;
+  created_at: string;
+  updated_at: string;
+};
+
+export type EditorialCalendarInsert = {
+  id?: string;
+  strategy_id?: string | null;
+  brand_profile_id: string;
+  agency_id: string;
+  campaign_start: string;
+  campaign_end: string;
+  posts: CalendarPost[];
+  total_posts: number;
+  posts_by_channel: Record<string, number>;
+  pillar_distribution: Record<string, number>;
+  agency_status?: AgencyCalendarStatus;
+  client_status?: ClientCalendarStatus;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type EditorialCalendarUpdate = Partial<EditorialCalendarInsert>;
+
+export function dbToEditorialCalendar(row: EditorialCalendarRow): EditorialCalendar {
+  return {
+    id: row.id,
+    strategyId: row.strategy_id,
+    brandProfileId: row.brand_profile_id,
+    agencyId: row.agency_id,
+    campaignStart: row.campaign_start,
+    campaignEnd: row.campaign_end,
+    posts: row.posts,
+    totalPosts: row.total_posts,
+    postsByChannel: row.posts_by_channel,
+    pillarDistribution: row.pillar_distribution,
+    agencyStatus: row.agency_status,
+    clientStatus: row.client_status,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
 export interface Database {
   public: {
     Tables: {
@@ -260,10 +411,22 @@ export interface Database {
         Update: BrandProfileUpdate;
         Relationships: [];
       };
+      strategies: {
+        Row: StrategyRow;
+        Insert: StrategyInsert;
+        Update: StrategyUpdate;
+        Relationships: [];
+      };
       strategy_docs: {
         Row: StrategyDocRow;
         Insert: StrategyDocInsert;
         Update: StrategyDocUpdate;
+        Relationships: [];
+      };
+      editorial_calendars: {
+        Row: EditorialCalendarRow;
+        Insert: EditorialCalendarInsert;
+        Update: EditorialCalendarUpdate;
         Relationships: [];
       };
       calendar_entries: {

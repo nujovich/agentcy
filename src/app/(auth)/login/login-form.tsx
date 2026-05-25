@@ -71,6 +71,7 @@ export function LoginForm() {
       <Button
         type="button"
         variant="outline"
+        size="lg"
         onClick={signInWithGoogle}
         disabled={loading !== null}
         className="w-full"
@@ -92,7 +93,8 @@ export function LoginForm() {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus:border-ring"
+            placeholder="hola@agencia.com"
+            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none transition-colors focus:border-ring focus:ring-3 focus:ring-ring/30"
           />
         </label>
         <label className="block space-y-1 text-sm">
@@ -103,14 +105,15 @@ export function LoginForm() {
             minLength={6}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus:border-ring"
+            placeholder="••••••••"
+            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none transition-colors focus:border-ring focus:ring-3 focus:ring-ring/30"
           />
         </label>
-        <Button type="submit" disabled={loading !== null} className="w-full">
+        <Button type="submit" size="lg" disabled={loading !== null} className="w-full">
           {loading === 'email'
-            ? 'Procesando...'
+            ? 'Procesando…'
             : mode === 'sign_in'
-              ? 'Iniciar sesión'
+              ? 'Acceder'
               : 'Crear cuenta'}
         </Button>
       </form>

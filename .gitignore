@@ -43,3 +43,7 @@ next-env.d.ts
 
 # design specs (local only)
 /docs/superpowers/
+/docs/specs/
+
+# superpowers plugin data
+/.superpowers/
