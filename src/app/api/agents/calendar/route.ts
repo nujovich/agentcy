@@ -16,15 +16,15 @@ import { createClient } from '@/lib/supabase/server';
 import type { CalendarPost } from '@/types/calendar';
 
 const bodySchema = z.object({
-  brandProfileId: z.string().uuid(),
-  strategyId: z.string().uuid(),
+  brandProfileId: z.uuid(),
+  strategyId: z.uuid(),
 });
 
 const postSchema = z.object({
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   time: z.string().regex(/^\d{2}:\d{2}$/),
-  channel: z.enum(['Instagram', 'TikTok', 'LinkedIn', 'YouTube', 'Facebook']),
-  format: z.enum(['Carousel', 'Reel', 'Story', 'Post', 'Video', 'Shorts']),
+  channel: z.string().min(1),
+  format: z.string().min(1),
   pillar: z.string().min(1),
   theme: z.string().min(1),
   contentType: z.enum(['image', 'video', 'text', 'mixed']),
@@ -111,7 +111,7 @@ export async function POST(request: Request) {
     const { text } = await provider.generateText({
       system: CALENDAR_SYSTEM_PROMPT,
       prompt: buildCalendarUserPrompt(profile, strategy, month, year),
-      maxTokens: 8000,
+      maxTokens: 10000,
     });
 
     const cleaned = stripCodeFences(text);

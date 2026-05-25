@@ -3,13 +3,36 @@
 import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
-import type { EditorialCalendar } from '@/types/calendar';
+import type { CalendarPost, EditorialCalendar } from '@/types/calendar';
 
 interface CalendarApprovalPanelProps {
   calendar: EditorialCalendar;
   onApprove: () => Promise<void>;
   onReject: (feedback: string) => Promise<void>;
   onEdit: () => void;
+}
+
+const DAYS_ES = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+
+const MONTH_NAMES_ES = [
+  'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
+];
+
+function getMonthCells(monthStr: string): string[] {
+  const parts = monthStr.split('-');
+  const y = parseInt(parts[0], 10);
+  const m = parseInt(parts[1], 10);
+  const jsFirstDow = new Date(y, m - 1, 1).getDay(); // 0=Sun
+  const leadingEmpty = jsFirstDow === 0 ? 6 : jsFirstDow - 1; // Mon-start
+  const daysInMonth = new Date(y, m, 0).getDate();
+  const cells: string[] = [];
+  for (let i = 0; i < leadingEmpty; i++) cells.push('');
+  for (let d = 1; d <= daysInMonth; d++) {
+    cells.push(`${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`);
+  }
+  while (cells.length % 7 !== 0) cells.push('');
+  return cells;
 }
 
 function DistributionBar({ label, value, total }: { label: string; value: number; total: number }) {
@@ -32,6 +55,85 @@ function DistributionBar({ label, value, total }: { label: string; value: number
         />
       </div>
     </div>
+  );
+}
+
+function MonthGrid({ posts, monthStr }: { posts: CalendarPost[]; monthStr: string }) {
+  const cells = getMonthCells(monthStr);
+  const parts = monthStr.split('-');
+  const mNum = parseInt(parts[1], 10);
+  const yNum = parseInt(parts[0], 10);
+  const monthName = `${MONTH_NAMES_ES[mNum - 1]} ${yNum}`;
+
+  const byDate = new Map<string, CalendarPost[]>();
+  for (const post of posts) {
+    const arr = byDate.get(post.date) ?? [];
+    arr.push(post);
+    byDate.set(post.date, arr);
+  }
+
+  return (
+    <section
+      className="rounded-xl border p-5 space-y-3"
+      style={{ borderColor: 'var(--brand-border)' }}
+    >
+      <h2 className="text-sm font-semibold">Calendario — {monthName}</h2>
+
+      {/* Day headers */}
+      <div className="grid grid-cols-7 gap-1">
+        {DAYS_ES.map((d) => (
+          <div
+            key={d}
+            className="py-1.5 text-center font-mono text-[10px] font-semibold uppercase tracking-wide"
+            style={{ color: 'var(--brand-ink-muted)' }}
+          >
+            {d}
+          </div>
+        ))}
+      </div>
+
+      {/* Day cells */}
+      <div className="grid grid-cols-7 gap-1">
+        {cells.map((dateStr, i) => {
+          if (!dateStr) {
+            return <div key={`empty-${i}`} className="min-h-[52px]" />;
+          }
+          const dayPosts = byDate.get(dateStr) ?? [];
+          const day = parseInt(dateStr.split('-')[2], 10);
+
+          return (
+            <div
+              key={dateStr}
+              className="min-h-[52px] rounded-lg p-1 space-y-0.5"
+              style={{
+                background: dayPosts.length > 0 ? 'var(--brand-surface)' : 'transparent',
+                border: '1px solid var(--brand-border)',
+              }}
+            >
+              <span
+                className="block text-right font-mono text-[9px] leading-none"
+                style={{ color: 'var(--brand-ink-muted)' }}
+              >
+                {day}
+              </span>
+              {dayPosts.map((post) => (
+                <div
+                  key={post.id}
+                  className="truncate rounded px-1 py-px text-[9px] font-semibold leading-tight"
+                  title={`${post.channel}: ${post.headline}`}
+                  style={{
+                    background: 'var(--brand-primary-soft)',
+                    color: 'var(--brand-primary-dark)',
+                  }}
+                >
+                  {post.channel}
+                </div>
+              ))}
+            </div>
+          );
+        })}
+      </div>
+    </section>
   );
 }
 
@@ -62,8 +164,6 @@ export function CalendarApprovalPanel({
 
   const channelEntries = Object.entries(calendar.postsByChannel);
   const pillarEntries = Object.entries(calendar.pillarDistribution);
-  const previewPosts = calendar.posts.slice(0, 5);
-
   const monthLabel = `${calendar.month} ${calendar.year}`;
 
   return (
@@ -149,40 +249,8 @@ export function CalendarApprovalPanel({
             </section>
           ) : null}
 
-          {/* First 5 posts preview */}
-          {previewPosts.length > 0 ? (
-            <section
-              className="rounded-xl border p-5 space-y-3"
-              style={{ borderColor: 'var(--brand-border)' }}
-            >
-              <h2 className="text-sm font-semibold">Primeros 5 posts</h2>
-              <div className="space-y-3">
-                {previewPosts.map((post) => (
-                  <div
-                    key={post.id}
-                    className="rounded-lg border p-3 space-y-1 text-sm"
-                    style={{ borderColor: 'var(--brand-border)' }}
-                  >
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-mono text-xs text-muted-foreground">{post.date}</span>
-                      <span className="font-mono text-xs text-muted-foreground">{post.time}</span>
-                      <span
-                        className="rounded-full px-2 py-0.5 font-mono text-[10px] font-semibold uppercase"
-                        style={{
-                          background: 'var(--brand-primary-soft)',
-                          color: 'var(--brand-primary-dark)',
-                        }}
-                      >
-                        {post.channel}
-                      </span>
-                    </div>
-                    <p className="font-semibold leading-snug">{post.headline}</p>
-                    <p className="text-xs text-muted-foreground line-clamp-2">{post.description}</p>
-                  </div>
-                ))}
-              </div>
-            </section>
-          ) : null}
+          {/* Full month calendar grid */}
+          <MonthGrid posts={calendar.posts} monthStr={calendar.month} />
         </div>
 
         {/* Sidebar */}

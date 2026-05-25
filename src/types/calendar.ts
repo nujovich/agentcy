@@ -1,5 +1,5 @@
-export type CalendarChannel = 'Instagram' | 'TikTok' | 'LinkedIn' | 'YouTube' | 'Facebook';
-export type CalendarFormat = 'Carousel' | 'Reel' | 'Story' | 'Post' | 'Video' | 'Shorts';
+export type CalendarChannel = string;
+export type CalendarFormat = string;
 export type CalendarContentType = 'image' | 'video' | 'text' | 'mixed';
 export type CalendarStatus = 'pending' | 'approved' | 'rejected';
 
