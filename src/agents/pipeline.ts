@@ -1,7 +1,7 @@
 import { BrandIntakeAgent, type BrandIntakeInput, brandProfileSchema } from '@/agents/brand-intake.agent';
 import { StrategyAgent, type StrategyInput, strategyDocSchema } from '@/agents/strategy.agent';
 import { CalendarAgent, type CalendarInput, calendarSchema } from '@/agents/calendar.agent';
-import { CopywriterAgent, type CopywriterInput, copyBatchSchema } from '@/agents/copywriter.agent';
+import { CopywriterAgent, type CopywriterInput } from '@/agents/copywriter.agent';
 import { BriefAgent, type BriefInput, designBriefBatchSchema } from '@/agents/brief.agent';
 import { ReportAgent, type ReportInput, monthlyReportSchema } from '@/agents/report.agent';
 import { createProvider } from '@/agents/provider-registry';
@@ -71,7 +71,7 @@ export async function runPipeline(input: PipelineInput): Promise<PipelineOutput>
   const t4 = Date.now();
   input.onEvent?.({ agent: 'copywriter', status: 'running', elapsed: 0 });
   const copywriterAgent = new CopywriterAgent(provider);
-  const copywriterInput: CopywriterInput = { entries: calendar.entries as any, brandProfile };
+  const copywriterInput: CopywriterInput = { calendar: calendar as any, brandProfile };
   const copies = await copywriterAgent.run(copywriterInput);
   input.onEvent?.({ agent: 'copywriter', status: 'completed', elapsed: elapsed(t4) });
 
@@ -80,10 +80,10 @@ export async function runPipeline(input: PipelineInput): Promise<PipelineOutput>
   input.onEvent?.({ agent: 'brief', status: 'running', elapsed: 0 });
   const briefAgent = new BriefAgent(provider);
   const briefInput: BriefInput = {
-    copies: copies.copies.map((c, i) => ({
-      copy: c.copy,
-      visualBrief: c.visualBrief,
-      format: calendar.entries[i]?.format ?? 'post',
+    copies: copies.map((c, i) => ({
+      copy: c.hook, // Map from 'hook' to 'copy'
+      visualBrief: c.body, // Map from 'body' to 'visualBrief'
+      format: (calendar as any).posts[i]?.format ?? 'post',
     })),
     brandProfile,
   };
