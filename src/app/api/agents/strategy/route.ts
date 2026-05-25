@@ -6,6 +6,7 @@ import { buildStrategyUserPrompt, STRATEGY_SYSTEM_PROMPT } from '@/agents/prompt
 import { dbToBrandProfile, dbToStrategy } from '@/lib/supabase/database.types';
 import type { StrategyInsert } from '@/lib/supabase/database.types';
 import { createClient } from '@/lib/supabase/server';
+import { captureAgentTrajectory } from '@/lib/capture-trajectory';
 
 const bodySchema = z.object({
   brandProfileId: z.uuid(),
@@ -125,6 +126,7 @@ export async function POST(request: Request) {
   const profile = dbToBrandProfile(profileRow);
 
   try {
+    const _startTime = Date.now();
     const provider = createProvider('anthropic', 'claude-opus-4-7');
     const { text } = await provider.generateText({
       system: STRATEGY_SYSTEM_PROMPT,
@@ -165,6 +167,19 @@ export async function POST(request: Request) {
     if (insertError || !row) {
       throw new Error(insertError?.message ?? 'Failed to save strategy');
     }
+
+    // Capturar trayectoria (no bloqueante)
+    const elapsed = Date.now() - _startTime;
+    captureAgentTrajectory({
+      agencyId: user.id,
+      brandProfileId,
+      agentName: 'strategy',
+      inputData: { brandProfileId, currentFollowersData },
+      outputData: extracted,
+      elapsedMs: elapsed,
+      modelUsed: 'claude-opus-4-7',
+      providerUsed: 'anthropic',
+    }).catch(() => {});
 
     return NextResponse.json(dbToStrategy(row));
   } catch (err) {
