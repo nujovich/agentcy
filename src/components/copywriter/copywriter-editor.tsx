@@ -4,7 +4,7 @@ import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import type { CalendarPost } from '@/types/calendar';
-import type { PostCopy, CopywritingProject } from '@/types/copywriter';
+import { COPY_CHANNELS, type PostCopy, type CopywritingProject } from '@/types/copywriter';
 
 const VIDEO_FORMATS = new Set(['Reel', 'Video', 'Shorts']);
 
@@ -37,7 +37,9 @@ export function CopywriterEditor({
       return (
         found ?? {
           calendarPostId: p.id,
-          channel: p.channel as PostCopy['channel'],
+          channel: (COPY_CHANNELS as readonly string[]).includes(p.channel)
+            ? (p.channel as PostCopy['channel'])
+            : COPY_CHANNELS[0],
           hook: '',
           body: '',
           cta: '',
@@ -160,8 +162,9 @@ export function CopywriterEditor({
           >
             {/* Hook */}
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold">Hook (primera línea)</label>
+              <label htmlFor="copy-hook" className="text-xs font-semibold">Hook (primera línea)</label>
               <input
+                id="copy-hook"
                 type="text"
                 value={currentCopy.hook}
                 onChange={(e) => handleField('hook', e.target.value)}
@@ -177,8 +180,9 @@ export function CopywriterEditor({
 
             {/* Body */}
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold">Body (cuerpo del post)</label>
+              <label htmlFor="copy-body" className="text-xs font-semibold">Body (cuerpo del post)</label>
               <textarea
+                id="copy-body"
                 value={currentCopy.body}
                 onChange={(e) => handleField('body', e.target.value)}
                 rows={5}
@@ -190,8 +194,9 @@ export function CopywriterEditor({
 
             {/* CTA */}
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold">CTA</label>
+              <label htmlFor="copy-cta" className="text-xs font-semibold">CTA</label>
               <input
+                id="copy-cta"
                 type="text"
                 value={currentCopy.cta}
                 onChange={(e) => handleField('cta', e.target.value)}
@@ -203,8 +208,9 @@ export function CopywriterEditor({
 
             {/* Hashtags */}
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold">Hashtags</label>
+              <label htmlFor="copy-hashtags" className="text-xs font-semibold">Hashtags</label>
               <textarea
+                id="copy-hashtags"
                 value={currentCopy.hashtags}
                 onChange={(e) => handleField('hashtags', e.target.value)}
                 rows={3}
@@ -217,8 +223,9 @@ export function CopywriterEditor({
             {/* Video script — only for Reel/Video/Shorts */}
             {VIDEO_FORMATS.has(currentPost.format) ? (
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold">Script de video</label>
+                <label htmlFor="copy-video-script" className="text-xs font-semibold">Script de video</label>
                 <textarea
+                  id="copy-video-script"
                   value={currentCopy.videoScript ?? ''}
                   onChange={(e) => handleField('videoScript', e.target.value)}
                   rows={4}

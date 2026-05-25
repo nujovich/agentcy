@@ -62,14 +62,20 @@ export function CopywriterApprovalPanel({
 
   async function handleApprove() {
     setIsActing(true);
-    await onApprove();
-    setIsActing(false);
+    try {
+      await onApprove();
+    } finally {
+      setIsActing(false);
+    }
   }
 
   async function handleReject() {
     setIsActing(true);
-    await onReject();
-    setIsActing(false);
+    try {
+      await onReject();
+    } finally {
+      setIsActing(false);
+    }
   }
 
   return (
