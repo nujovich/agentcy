@@ -34,6 +34,11 @@ import type {
   ClientCalendarStatus,
   EditorialCalendar,
 } from '@/types/calendar';
+import type {
+  CopyAgencyStatus,
+  CopywritingProject,
+  PostCopy,
+} from '@/types/copywriter';
 
 export type Json =
   | string
@@ -396,6 +401,43 @@ export function dbToEditorialCalendar(row: EditorialCalendarRow): EditorialCalen
   };
 }
 
+export type CopywritingProjectRow = {
+  id: string;
+  editorial_calendar_id: string;
+  brand_profile_id: string;
+  agency_id: string;
+  copies: PostCopy[];
+  agency_status: CopyAgencyStatus;
+  created_at: string;
+  updated_at: string;
+};
+
+export type CopywritingProjectInsert = {
+  id?: string;
+  editorial_calendar_id: string;
+  brand_profile_id: string;
+  agency_id: string;
+  copies: PostCopy[];
+  agency_status?: CopyAgencyStatus;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type CopywritingProjectUpdate = Partial<CopywritingProjectInsert>;
+
+export function dbToCopywritingProject(row: CopywritingProjectRow): CopywritingProject {
+  return {
+    id: row.id,
+    editorialCalendarId: row.editorial_calendar_id,
+    brandProfileId: row.brand_profile_id,
+    agencyId: row.agency_id,
+    copies: row.copies,
+    agencyStatus: row.agency_status,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
 export interface Database {
   public: {
     Tables: {
@@ -427,6 +469,12 @@ export interface Database {
         Row: EditorialCalendarRow;
         Insert: EditorialCalendarInsert;
         Update: EditorialCalendarUpdate;
+        Relationships: [];
+      };
+      copywriting_projects: {
+        Row: CopywritingProjectRow;
+        Insert: CopywritingProjectInsert;
+        Update: CopywritingProjectUpdate;
         Relationships: [];
       };
       calendar_entries: {
