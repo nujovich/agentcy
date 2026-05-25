@@ -29,8 +29,9 @@ import type {
   StrategyStatus,
 } from '@/types/strategy';
 import type {
+  AgencyCalendarStatus,
   CalendarPost,
-  CalendarStatus,
+  ClientCalendarStatus,
   EditorialCalendar,
 } from '@/types/calendar';
 
@@ -345,13 +346,14 @@ export type EditorialCalendarRow = {
   strategy_id: string | null;
   brand_profile_id: string;
   agency_id: string;
-  month: string;
-  year: number;
+  campaign_start: string;
+  campaign_end: string;
   posts: CalendarPost[];
   total_posts: number;
   posts_by_channel: Record<string, number>;
   pillar_distribution: Record<string, number>;
-  status: CalendarStatus;
+  agency_status: AgencyCalendarStatus;
+  client_status: ClientCalendarStatus;
   created_at: string;
   updated_at: string;
 };
@@ -361,13 +363,14 @@ export type EditorialCalendarInsert = {
   strategy_id?: string | null;
   brand_profile_id: string;
   agency_id: string;
-  month: string;
-  year: number;
+  campaign_start: string;
+  campaign_end: string;
   posts: CalendarPost[];
   total_posts: number;
   posts_by_channel: Record<string, number>;
   pillar_distribution: Record<string, number>;
-  status?: CalendarStatus;
+  agency_status?: AgencyCalendarStatus;
+  client_status?: ClientCalendarStatus;
   created_at?: string;
   updated_at?: string;
 };
@@ -380,13 +383,14 @@ export function dbToEditorialCalendar(row: EditorialCalendarRow): EditorialCalen
     strategyId: row.strategy_id,
     brandProfileId: row.brand_profile_id,
     agencyId: row.agency_id,
-    month: row.month,
-    year: row.year,
+    campaignStart: row.campaign_start,
+    campaignEnd: row.campaign_end,
     posts: row.posts,
     totalPosts: row.total_posts,
     postsByChannel: row.posts_by_channel,
     pillarDistribution: row.pillar_distribution,
-    status: row.status,
+    agencyStatus: row.agency_status,
+    clientStatus: row.client_status,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
