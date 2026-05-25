@@ -13,6 +13,13 @@ interface ModelStatus {
   qualityScore?: number;
 }
 
+interface ActiveModel {
+  agent_name: string;
+  model_name?: string;
+  quality_score?: number;
+  status: string;
+}
+
 interface TrainingDashboardData {
   models: ModelStatus[];
   totalTrajectories: number;
@@ -42,7 +49,8 @@ export default function TrainingDashboard() {
   const [buildingDataset, setBuildingDataset] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchData();
+    void fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function fetchData() {
@@ -61,8 +69,8 @@ export default function TrainingDashboard() {
       }
 
       // Modelos fine-tuneados activos
-      const activeModels = (datasets.activeModels ?? []) as any[];
-      const activeByAgent: Record<string, any> = {};
+      const activeModels = (datasets.activeModels ?? []) as ActiveModel[];
+      const activeByAgent: Record<string, ActiveModel> = {};
       for (const m of activeModels) {
         activeByAgent[m.agent_name] = m;
       }
@@ -131,7 +139,7 @@ export default function TrainingDashboard() {
         alert(`❌ ${result.error ?? 'Error al entrenar'}`);
       }
       fetchData();
-    } catch (err) {
+    } catch {
       alert('Error al conectar con el servidor');
     } finally {
       setBuildingDataset(null);
@@ -324,7 +332,7 @@ export default function TrainingDashboard() {
                             '🎯 Entrenar modelo'
                           )}
                         </button>
-                      )}
+                      ) : null}
                       {model.trainingStatus === 'collecting' && (
                         <span className="text-xs text-muted-foreground">
                           {50 - model.trajectoryCount} trayectorias más
