@@ -70,6 +70,7 @@ export async function POST(request: Request, { params }: RouteContext) {
       total_posts: posts.length,
       posts_by_channel: postsByChannel,
       pillar_distribution: pillarDistribution,
+      agency_status: 'pending',
     })
     .eq('id', id)
     .eq('agency_id', user.id)

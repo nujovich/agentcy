@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import Link from 'next/link';
 
 import { CalendarGrid } from '@/components/calendar/calendar-grid';
@@ -32,6 +32,9 @@ export function CalendarPage({ profile, strategy, initialCalendar }: CalendarPag
   const [rejectMode, setRejectMode] = useState(false);
   const [rejectFeedback, setRejectFeedback] = useState('');
   const [isActing, setIsActing] = useState(false);
+
+  const shiftStartRef = useRef<HTMLInputElement>(null);
+  const shiftEndRef = useRef<HTMLInputElement>(null);
 
   // Date range for generation
   const now = new Date();
@@ -248,7 +251,7 @@ export function CalendarPage({ profile, strategy, initialCalendar }: CalendarPag
 
   const campaignLabel = `${calendar.campaignStart} → ${calendar.campaignEnd}`;
 
-  const CLIENT_STATUS_LABELS: Record<string, string> = {
+  const CLIENT_STATUS_LABELS: Record<ClientCalendarStatus, string> = {
     not_shared: 'No compartido con cliente',
     pending: 'Pendiente de aprobación del cliente',
     approved: 'Aprobado por el cliente',
@@ -398,7 +401,7 @@ export function CalendarPage({ profile, strategy, initialCalendar }: CalendarPag
                 <input
                   type="date"
                   defaultValue={calendar.campaignStart}
-                  id="shift-start"
+                  ref={shiftStartRef}
                   className="rounded border border-border bg-background px-2 py-1 text-xs"
                 />
               </label>
@@ -407,7 +410,7 @@ export function CalendarPage({ profile, strategy, initialCalendar }: CalendarPag
                 <input
                   type="date"
                   defaultValue={calendar.campaignEnd}
-                  id="shift-end"
+                  ref={shiftEndRef}
                   className="rounded border border-border bg-background px-2 py-1 text-xs"
                 />
               </label>
@@ -415,8 +418,8 @@ export function CalendarPage({ profile, strategy, initialCalendar }: CalendarPag
                 size="sm"
                 variant="outline"
                 onClick={() => {
-                  const s = (document.getElementById('shift-start') as HTMLInputElement).value;
-                  const e = (document.getElementById('shift-end') as HTMLInputElement).value;
+                  const s = shiftStartRef.current?.value;
+                  const e = shiftEndRef.current?.value;
                   if (s && e) handleShiftDates(s, e);
                 }}
               >
