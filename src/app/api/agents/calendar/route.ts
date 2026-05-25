@@ -5,6 +5,7 @@ import { createProvider } from '@/agents/provider-registry';
 import {
   CALENDAR_SYSTEM_PROMPT,
   buildCalendarUserPrompt,
+  computePostCount,
 } from '@/agents/prompts/calendar.prompt';
 import {
   dbToBrandProfile,
@@ -16,8 +17,10 @@ import { createClient } from '@/lib/supabase/server';
 import type { CalendarPost } from '@/types/calendar';
 
 const bodySchema = z.object({
-  brandProfileId: z.uuid(),
-  strategyId: z.uuid(),
+  brandProfileId: z.string().uuid(),
+  strategyId: z.string().uuid(),
+  startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'startDate must be YYYY-MM-DD'),
+  endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'endDate must be YYYY-MM-DD'),
 });
 
 const postSchema = z.object({
@@ -70,7 +73,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const { brandProfileId, strategyId } = parsed.data;
+  const { brandProfileId, strategyId, startDate, endDate } = parsed.data;
 
   const { data: strategyRow, error: strategyError } = await supabase
     .from('strategies')
@@ -100,18 +103,14 @@ export async function POST(request: Request) {
 
   const strategy = dbToStrategy(strategyRow);
   const profile = dbToBrandProfile(profileRow);
-
-  const now = new Date();
-  const year = now.getFullYear();
-  const monthNum = now.getMonth() + 1;
-  const month = `${year}-${String(monthNum).padStart(2, '0')}`;
+  const postCount = computePostCount(startDate, endDate);
 
   try {
     const provider = createProvider('anthropic', 'claude-opus-4-7');
     const { text } = await provider.generateText({
       system: CALENDAR_SYSTEM_PROMPT,
-      prompt: buildCalendarUserPrompt(profile, strategy, month, year),
-      maxTokens: 10000,
+      prompt: buildCalendarUserPrompt(profile, strategy, startDate, endDate),
+      maxTokens: Math.max(10000, postCount * 400),
     });
 
     const cleaned = stripCodeFences(text);
@@ -134,13 +133,14 @@ export async function POST(request: Request) {
       strategy_id: strategyId,
       brand_profile_id: brandProfileId,
       agency_id: user.id,
-      month,
-      year,
+      campaign_start: startDate,
+      campaign_end: endDate,
       posts,
       total_posts: posts.length,
       posts_by_channel: postsByChannel,
       pillar_distribution: pillarDistribution,
-      status: 'pending',
+      agency_status: 'pending',
+      client_status: 'not_shared',
     };
 
     const { data: row, error: insertError } = await supabase
