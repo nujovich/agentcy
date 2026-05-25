@@ -181,6 +181,31 @@ export default async function ClientPage({ params }: PageProps) {
           ? 'in_review'
           : 'unlocked';
 
+  const { count: copyCount } = await supabase
+    .from('copywriting_projects')
+    .select('id', { count: 'exact', head: true })
+    .eq('brand_profile_id', id)
+    .eq('agency_id', user.id)
+    .eq('agency_status', 'approved');
+
+  const { data: pendingCopy } = await supabase
+    .from('copywriting_projects')
+    .select('id')
+    .eq('brand_profile_id', id)
+    .eq('agency_id', user.id)
+    .eq('agency_status', 'pending')
+    .limit(1)
+    .maybeSingle();
+
+  const copyStatus =
+    calendarStatus !== 'approved'
+      ? 'locked'
+      : (copyCount ?? 0) > 0
+        ? 'approved'
+        : pendingCopy
+          ? 'in_review'
+          : 'unlocked';
+
   return (
     <main className="mx-auto max-w-3xl space-y-6 p-6">
       {/* Header */}
@@ -231,7 +256,12 @@ export default async function ClientPage({ params }: PageProps) {
             status={calendarStatus}
             href={calendarStatus === 'unlocked' || calendarStatus === 'in_review' ? `/clients/${id}/calendar` : undefined}
           />
-          <PipelineStep index={4} label="Copy" status="locked" />
+          <PipelineStep
+            index={4}
+            label="Copy"
+            status={copyStatus}
+            href={copyStatus === 'unlocked' || copyStatus === 'in_review' ? `/clients/${id}/copywriter` : undefined}
+          />
           <PipelineStep index={5} label="Visual Brief" status="locked" />
           <PipelineStep index={6} label="Report" status="locked" />
         </div>
