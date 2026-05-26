@@ -191,7 +191,8 @@ export async function POST(request: Request) {
           model_used: 'claude-opus-4-7',
           elapsed_ms: elapsedMs,
         })
-        .eq('id', rowId);
+        .eq('id', rowId)
+        .eq('agency_id', agencyId);
 
       captureAgentTrajectory({
         agencyId,
@@ -207,7 +208,8 @@ export async function POST(request: Request) {
       await bg
         .from('strategies')
         .update({ status: 'failed', elapsed_ms: Date.now() - startTime })
-        .eq('id', rowId);
+        .eq('id', rowId)
+        .eq('agency_id', agencyId);
     }
   });
 
