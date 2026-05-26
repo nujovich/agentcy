@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { DM_Sans, JetBrains_Mono, Plus_Jakarta_Sans } from "next/font/google";
+import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
@@ -37,7 +38,10 @@ export default function RootLayout({
       lang="es"
       className={`${plusJakartaSans.variable} ${dmSans.variable} ${jetBrainsMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col font-sans">{children}</body>
+      <body className="min-h-full flex flex-col font-sans">
+        {children}
+        <Toaster position="bottom-right" richColors />
+      </body>
     </html>
   );
 }
