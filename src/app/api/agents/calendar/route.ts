@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { after, NextResponse } from 'next/server';
 import { z } from 'zod';
 
 import { createProvider } from '@/agents/provider-registry';
@@ -9,7 +9,6 @@ import {
 } from '@/agents/prompts/calendar.prompt';
 import {
   dbToBrandProfile,
-  dbToEditorialCalendar,
   dbToStrategy,
 } from '@/lib/supabase/database.types';
 import type { EditorialCalendarInsert } from '@/lib/supabase/database.types';
@@ -105,60 +104,82 @@ export async function POST(request: Request) {
   const profile = dbToBrandProfile(profileRow);
   const postCount = computePostCount(startDate, endDate);
 
-  try {
-    const provider = createProvider('anthropic', 'claude-opus-4-7');
-    const { text } = await provider.generateText({
-      system: CALENDAR_SYSTEM_PROMPT,
-      prompt: buildCalendarUserPrompt(profile, strategy, startDate, endDate),
-      maxTokens: Math.max(10000, postCount * 400),
-    });
+  const placeholder: EditorialCalendarInsert = {
+    strategy_id: strategyId,
+    brand_profile_id: brandProfileId,
+    agency_id: user.id,
+    campaign_start: startDate,
+    campaign_end: endDate,
+    posts: [],
+    total_posts: 0,
+    posts_by_channel: {},
+    pillar_distribution: {},
+    agency_status: 'generating',
+    client_status: 'not_shared',
+  };
 
-    const cleaned = stripCodeFences(text);
-    const extracted = llmResponseSchema.parse(JSON.parse(cleaned));
+  const { data: row, error: insertError } = await supabase
+    .from('editorial_calendars')
+    .insert(placeholder)
+    .select()
+    .single();
 
-    const posts: CalendarPost[] = extracted.posts.map((p) => ({
-      ...p,
-      id: crypto.randomUUID(),
-    }));
-
-    const postsByChannel: Record<string, number> = {};
-    const pillarDistribution: Record<string, number> = {};
-
-    for (const post of posts) {
-      postsByChannel[post.channel] = (postsByChannel[post.channel] ?? 0) + 1;
-      pillarDistribution[post.pillar] = (pillarDistribution[post.pillar] ?? 0) + 1;
-    }
-
-    const insert: EditorialCalendarInsert = {
-      strategy_id: strategyId,
-      brand_profile_id: brandProfileId,
-      agency_id: user.id,
-      campaign_start: startDate,
-      campaign_end: endDate,
-      posts,
-      total_posts: posts.length,
-      posts_by_channel: postsByChannel,
-      pillar_distribution: pillarDistribution,
-      agency_status: 'pending',
-      client_status: 'not_shared',
-    };
-
-    const { data: row, error: insertError } = await supabase
-      .from('editorial_calendars')
-      .insert(insert)
-      .select()
-      .single();
-
-    if (insertError || !row) {
-      throw new Error(insertError?.message ?? 'Failed to save editorial calendar');
-    }
-
-    return NextResponse.json(dbToEditorialCalendar(row));
-  } catch (err) {
-    const message = err instanceof Error ? err.message : 'Unknown error';
-    return NextResponse.json(
-      { error: `Calendar generation failed: ${message}` },
-      { status: 500 },
-    );
+  if (insertError || !row) {
+    return NextResponse.json({ error: 'Failed to start generation' }, { status: 500 });
   }
+
+  const rowId = row.id;
+  const agencyId = user.id;
+
+  after(async () => {
+    const bg = await createClient();
+    const startTime = Date.now();
+    try {
+      const provider = createProvider('anthropic', 'claude-opus-4-7');
+      const { text } = await provider.generateText({
+        system: CALENDAR_SYSTEM_PROMPT,
+        prompt: buildCalendarUserPrompt(profile, strategy, startDate, endDate),
+        maxTokens: Math.max(10000, postCount * 400),
+      });
+
+      const cleaned = stripCodeFences(text);
+      const extracted = llmResponseSchema.parse(JSON.parse(cleaned));
+
+      const posts: CalendarPost[] = extracted.posts.map((p) => ({
+        ...p,
+        id: crypto.randomUUID(),
+      }));
+
+      const postsByChannel: Record<string, number> = {};
+      const pillarDistribution: Record<string, number> = {};
+      for (const post of posts) {
+        postsByChannel[post.channel] = (postsByChannel[post.channel] ?? 0) + 1;
+        pillarDistribution[post.pillar] = (pillarDistribution[post.pillar] ?? 0) + 1;
+      }
+
+      const elapsedMs = Date.now() - startTime;
+
+      await bg
+        .from('editorial_calendars')
+        .update({
+          posts,
+          total_posts: posts.length,
+          posts_by_channel: postsByChannel,
+          pillar_distribution: pillarDistribution,
+          agency_status: 'pending',
+          model_used: 'claude-opus-4-7',
+          elapsed_ms: elapsedMs,
+        })
+        .eq('id', rowId)
+        .eq('agency_id', agencyId);
+    } catch {
+      await bg
+        .from('editorial_calendars')
+        .update({ agency_status: 'failed', elapsed_ms: Date.now() - startTime })
+        .eq('id', rowId)
+        .eq('agency_id', agencyId);
+    }
+  });
+
+  return NextResponse.json({ id: rowId, status: 'generating' });
 }
