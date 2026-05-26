@@ -1,5 +1,7 @@
 'use client';
 
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 import { CopywriterApprovalPanel } from '@/components/copywriter/copywriter-approval-panel';
@@ -15,7 +17,7 @@ interface CopywriterPageProps {
   initialProject: CopywritingProject | null;
 }
 
-type PageState = 'generate' | 'loading' | 'edit' | 'review' | 'approved';
+type PageState = 'generate' | 'edit' | 'review' | 'approved';
 
 function deriveInitialState(project: CopywritingProject | null): PageState {
   if (!project) return 'generate';
@@ -28,12 +30,12 @@ export function CopywriterPage({
   calendar,
   initialProject,
 }: CopywriterPageProps) {
+  const router = useRouter();
   const [project, setProject] = useState<CopywritingProject | null>(initialProject);
   const [state, setState] = useState<PageState>(() => deriveInitialState(initialProject));
   const [error, setError] = useState<string | null>(null);
 
   async function handleGenerate() {
-    setState('loading');
     setError(null);
     try {
       const res = await fetch('/api/agents/copywriter', {
@@ -46,11 +48,9 @@ export function CopywriterPage({
         const msg = (json as { error?: string }).error ?? 'Error al generar el copy';
         throw new Error(msg);
       }
-      setProject(json as CopywritingProject);
-      setState('review');
+      router.push(`/clients/${profile.id}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error desconocido');
-      setState('generate');
     }
   }
 
@@ -115,6 +115,10 @@ export function CopywriterPage({
 
   return (
     <main className="mx-auto max-w-3xl space-y-6 p-6">
+      <Link href={`/clients/${profile.id}`} className="text-xs text-primary hover:underline">
+        ← Volver a {profile.clientName}
+      </Link>
+
       {error ? (
         <div
           className="rounded-lg border px-4 py-3 text-sm"
@@ -128,12 +132,12 @@ export function CopywriterPage({
         </div>
       ) : null}
 
-      {state === 'generate' || state === 'loading' ? (
+      {state === 'generate' ? (
         <CopywriterGenerator
           calendar={calendar}
           profile={profile}
           onGenerate={handleGenerate}
-          isLoading={state === 'loading'}
+          isLoading={false}
         />
       ) : null}
 
