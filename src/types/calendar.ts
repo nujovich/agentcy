@@ -33,6 +33,8 @@ export interface EditorialCalendar {
   pillarDistribution: Record<string, number>;
   agencyStatus: AgencyCalendarStatus;
   clientStatus: ClientCalendarStatus;
+  modelUsed?: string;
+  elapsedMs?: number;
   createdAt: string;
   updatedAt: string;
 }

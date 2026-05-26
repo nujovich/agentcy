@@ -73,6 +73,8 @@ export interface Strategy {
   nextSteps: string;
   feedback: string | null;
   status: StrategyStatus;
+  modelUsed?: string;
+  elapsedMs?: number;
   createdAt: string;
   updatedAt: string;
 }

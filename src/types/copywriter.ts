@@ -36,6 +36,8 @@ export interface CopywritingProject {
   agencyId: string;
   copies: PostCopy[];
   agencyStatus: CopyAgencyStatus;
+  modelUsed?: string;
+  elapsedMs?: number;
   createdAt: string;
   updatedAt: string;
 }
