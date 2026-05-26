@@ -134,6 +134,8 @@ export type StrategyRow = {
   best_posting_times: Record<string, string[]>;
   reasoning: string;
   next_steps: string;
+  model_used: string | null;
+  elapsed_ms: number | null;
   feedback: string | null;
   status: StrategyStatus;
   created_at: string;
@@ -160,6 +162,8 @@ export type StrategyInsert = {
   reasoning: string;
   next_steps: string;
   feedback?: string | null;
+  model_used?: string | null;
+  elapsed_ms?: number | null;
   status?: StrategyStatus;
   created_at?: string;
   updated_at?: string;
@@ -188,6 +192,8 @@ export function dbToStrategy(row: StrategyRow): Strategy {
     reasoning: row.reasoning,
     nextSteps: row.next_steps,
     feedback: row.feedback,
+    modelUsed: row.model_used ?? undefined,
+    elapsedMs: row.elapsed_ms ?? undefined,
     status: row.status,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
@@ -357,6 +363,8 @@ export type EditorialCalendarRow = {
   total_posts: number;
   posts_by_channel: Record<string, number>;
   pillar_distribution: Record<string, number>;
+  model_used: string | null;
+  elapsed_ms: number | null;
   agency_status: AgencyCalendarStatus;
   client_status: ClientCalendarStatus;
   created_at: string;
@@ -376,6 +384,8 @@ export type EditorialCalendarInsert = {
   pillar_distribution: Record<string, number>;
   agency_status?: AgencyCalendarStatus;
   client_status?: ClientCalendarStatus;
+  model_used?: string | null;
+  elapsed_ms?: number | null;
   created_at?: string;
   updated_at?: string;
 };
@@ -396,6 +406,8 @@ export function dbToEditorialCalendar(row: EditorialCalendarRow): EditorialCalen
     pillarDistribution: row.pillar_distribution,
     agencyStatus: row.agency_status,
     clientStatus: row.client_status,
+    modelUsed: row.model_used ?? undefined,
+    elapsedMs: row.elapsed_ms ?? undefined,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -408,6 +420,8 @@ export type CopywritingProjectRow = {
   agency_id: string;
   copies: PostCopy[];
   agency_status: CopyAgencyStatus;
+  model_used: string | null;
+  elapsed_ms: number | null;
   created_at: string;
   updated_at: string;
 };
@@ -419,6 +433,8 @@ export type CopywritingProjectInsert = {
   agency_id: string;
   copies: PostCopy[];
   agency_status?: CopyAgencyStatus;
+  model_used?: string | null;
+  elapsed_ms?: number | null;
   created_at?: string;
   updated_at?: string;
 };
@@ -433,6 +449,8 @@ export function dbToCopywritingProject(row: CopywritingProjectRow): CopywritingP
     agencyId: row.agency_id,
     copies: row.copies,
     agencyStatus: row.agency_status,
+    modelUsed: row.model_used ?? undefined,
+    elapsedMs: row.elapsed_ms ?? undefined,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
