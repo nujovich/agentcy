@@ -50,7 +50,7 @@ export interface KPIScenario {
   realistic_reasoning: string;
 }
 
-export type StrategyStatus = 'calibration' | 'pending' | 'approved' | 'rejected';
+export type StrategyStatus = 'generating' | 'calibration' | 'pending' | 'approved' | 'rejected' | 'failed';
 
 export interface Strategy {
   id: string;

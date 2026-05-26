@@ -1,7 +1,7 @@
 export type CalendarChannel = string;
 export type CalendarFormat = string;
 export type CalendarContentType = 'image' | 'video' | 'text' | 'mixed';
-export type AgencyCalendarStatus = 'pending' | 'approved' | 'rejected';
+export type AgencyCalendarStatus = 'generating' | 'pending' | 'approved' | 'rejected' | 'failed';
 export type ClientCalendarStatus = 'not_shared' | 'pending' | 'approved' | 'rejected';
 
 export interface CalendarPost {

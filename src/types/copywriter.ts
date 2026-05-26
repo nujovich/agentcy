@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 export const COPY_CHANNELS = ['Instagram', 'TikTok', 'LinkedIn', 'YouTube', 'Facebook'] as const;
 export type CopyChannel = (typeof COPY_CHANNELS)[number];
-export type CopyAgencyStatus = 'pending' | 'approved' | 'rejected';
+export type CopyAgencyStatus = 'generating' | 'pending' | 'approved' | 'rejected' | 'failed';
 
 // Zod schema for saving/editing copies (base — also used as PostCopy type source)
 export const postCopySaveSchema = z.object({
