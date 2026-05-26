@@ -1,9 +1,9 @@
-import { NextResponse } from 'next/server';
+import { after, NextResponse } from 'next/server';
 import { z } from 'zod';
 
 import { createProvider } from '@/agents/provider-registry';
 import { buildStrategyUserPrompt, STRATEGY_SYSTEM_PROMPT } from '@/agents/prompts/strategy.prompt';
-import { dbToBrandProfile, dbToStrategy } from '@/lib/supabase/database.types';
+import { dbToBrandProfile } from '@/lib/supabase/database.types';
 import type { StrategyInsert } from '@/lib/supabase/database.types';
 import { createClient } from '@/lib/supabase/server';
 import { captureAgentTrajectory } from '@/lib/capture-trajectory';
@@ -125,68 +125,91 @@ export async function POST(request: Request) {
 
   const profile = dbToBrandProfile(profileRow);
 
-  try {
-    const _startTime = Date.now();
-    const provider = createProvider('anthropic', 'claude-opus-4-7');
-    const { text } = await provider.generateText({
-      system: STRATEGY_SYSTEM_PROMPT,
-      prompt: buildStrategyUserPrompt(profile, currentFollowersData),
-      maxTokens: 6000,
-    });
+  const placeholder: StrategyInsert = {
+    brand_profile_id: brandProfileId,
+    agency_id: user.id,
+    objectives: { reach: '', engagement: '', conversion: '', retention: '' },
+    primary_channels: [],
+    channel_strategies: [],
+    content_pillars: [],
+    content_mix: { educational: 0, promotional: 0, entertaining: 0, behind_the_scenes: 0 },
+    kpis: [],
+    posting_frequency: {},
+    best_posting_times: {},
+    reasoning: '',
+    next_steps: '',
+    status: 'generating',
+  };
 
-    const cleaned = stripCodeFences(text);
-    const extracted = llmResponseSchema.parse(JSON.parse(cleaned));
+  const { data: row, error: insertError } = await supabase
+    .from('strategies')
+    .insert(placeholder)
+    .select()
+    .single();
 
-    const insert: StrategyInsert = {
-      brand_profile_id: brandProfileId,
-      agency_id: user.id,
-      objectives: extracted.objectives,
-      primary_channels: extracted.primaryChannels,
-      channel_strategies: extracted.channelStrategies,
-      content_pillars: extracted.contentPillars,
-      content_mix: extracted.contentMix,
-      current_followers_data: currentFollowersData,
-      scenario_conservative: extracted.scenarioConservative,
-      scenario_sustainable: extracted.scenarioSustainable,
-      scenario_aggressive: extracted.scenarioAggressive,
-      selected_scenario: null,
-      kpis: extracted.scenarioSustainable.kpis,
-      posting_frequency: extracted.postingFrequency,
-      best_posting_times: extracted.bestPostingTimes,
-      reasoning: extracted.reasoning,
-      next_steps: extracted.next_steps,
-      status: 'calibration',
-    };
-
-    const { data: row, error: insertError } = await supabase
-      .from('strategies')
-      .insert(insert)
-      .select()
-      .single();
-
-    if (insertError || !row) {
-      throw new Error(insertError?.message ?? 'Failed to save strategy');
-    }
-
-    // Capturar trayectoria (no bloqueante)
-    const elapsed = Date.now() - _startTime;
-    captureAgentTrajectory({
-      agencyId: user.id,
-      brandProfileId,
-      agentName: 'strategy',
-      inputData: { brandProfileId, currentFollowersData },
-      outputData: extracted,
-      elapsedMs: elapsed,
-      modelUsed: 'claude-opus-4-7',
-      providerUsed: 'anthropic',
-    }).catch(() => {});
-
-    return NextResponse.json(dbToStrategy(row));
-  } catch (err) {
-    const message = err instanceof Error ? err.message : 'Unknown error';
-    return NextResponse.json(
-      { error: `Strategy generation failed: ${message}` },
-      { status: 500 },
-    );
+  if (insertError || !row) {
+    return NextResponse.json({ error: 'Failed to start generation' }, { status: 500 });
   }
+
+  const agencyId = user.id;
+  const rowId = row.id;
+
+  after(async () => {
+    const bg = await createClient();
+    const startTime = Date.now();
+    try {
+      const provider = createProvider('anthropic', 'claude-opus-4-7');
+      const { text } = await provider.generateText({
+        system: STRATEGY_SYSTEM_PROMPT,
+        prompt: buildStrategyUserPrompt(profile, currentFollowersData),
+        maxTokens: 6000,
+      });
+
+      const cleaned = stripCodeFences(text);
+      const extracted = llmResponseSchema.parse(JSON.parse(cleaned));
+      const elapsedMs = Date.now() - startTime;
+
+      await bg
+        .from('strategies')
+        .update({
+          objectives: extracted.objectives,
+          primary_channels: extracted.primaryChannels,
+          channel_strategies: extracted.channelStrategies,
+          content_pillars: extracted.contentPillars,
+          content_mix: extracted.contentMix,
+          current_followers_data: currentFollowersData,
+          scenario_conservative: extracted.scenarioConservative,
+          scenario_sustainable: extracted.scenarioSustainable,
+          scenario_aggressive: extracted.scenarioAggressive,
+          selected_scenario: null,
+          kpis: extracted.scenarioSustainable.kpis,
+          posting_frequency: extracted.postingFrequency,
+          best_posting_times: extracted.bestPostingTimes,
+          reasoning: extracted.reasoning,
+          next_steps: extracted.next_steps,
+          status: 'calibration',
+          model_used: 'claude-opus-4-7',
+          elapsed_ms: elapsedMs,
+        })
+        .eq('id', rowId);
+
+      captureAgentTrajectory({
+        agencyId,
+        brandProfileId,
+        agentName: 'strategy',
+        inputData: { brandProfileId, currentFollowersData },
+        outputData: extracted,
+        elapsedMs,
+        modelUsed: 'claude-opus-4-7',
+        providerUsed: 'anthropic',
+      }).catch(() => {});
+    } catch {
+      await bg
+        .from('strategies')
+        .update({ status: 'failed', elapsed_ms: Date.now() - startTime })
+        .eq('id', rowId);
+    }
+  });
+
+  return NextResponse.json({ id: rowId, status: 'generating' });
 }
