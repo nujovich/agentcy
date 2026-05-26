@@ -15,12 +15,13 @@ interface StrategyPageProps {
   initialStrategy: Strategy | null;
 }
 
-type PageState = 'generate' | 'loading' | 'calibration' | 'review' | 'approved';
+type PageState = 'generate' | 'calibration' | 'review' | 'approved';
 
 function deriveInitialState(strategy: Strategy | null): PageState {
   if (!strategy) return 'generate';
   if (strategy.status === 'approved') return 'approved';
   if (strategy.status === 'calibration') return 'calibration';
+  if (strategy.status === 'generating' || strategy.status === 'failed') return 'generate';
   return 'review';
 }
 
@@ -31,7 +32,6 @@ export function StrategyPage({ profile, initialStrategy }: StrategyPageProps) {
   const [error, setError] = useState<string | null>(null);
 
   const handleGenerate = async (followersData: Record<string, number>) => {
-    setState('loading');
     setError(null);
     try {
       const res = await fetch('/api/agents/strategy', {
@@ -50,11 +50,9 @@ export function StrategyPage({ profile, initialStrategy }: StrategyPageProps) {
             : 'Error al generar la estrategia';
         throw new Error(msg);
       }
-      setStrategy(json as Strategy);
-      setState('calibration');
+      router.push(`/clients/${profile.id}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error desconocido');
-      setState('generate');
     }
   };
 
@@ -130,8 +128,8 @@ export function StrategyPage({ profile, initialStrategy }: StrategyPageProps) {
 
   return (
     <main className="mx-auto max-w-4xl space-y-6 p-6">
-      <Link href={`/clients/${profile.id}`} className="text-xs text-muted-foreground hover:underline">
-        ← Volver al cliente
+      <Link href={`/clients/${profile.id}`} className="text-xs text-primary hover:underline">
+        ← Volver a {profile.clientName}
       </Link>
 
       {error ? (
@@ -140,11 +138,11 @@ export function StrategyPage({ profile, initialStrategy }: StrategyPageProps) {
         </p>
       ) : null}
 
-      {state === 'generate' || state === 'loading' ? (
+      {state === 'generate' ? (
         <StrategyGenerator
           profile={profile}
           onGenerate={handleGenerate}
-          isLoading={state === 'loading'}
+          isLoading={false}
         />
       ) : state === 'calibration' && strategy ? (
         <KPICalibrationPanel
