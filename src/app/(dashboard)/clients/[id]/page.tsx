@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 
 import { ApproveButton } from '@/components/clients/approve-button';
 import { BrandProfileCard } from '@/components/clients/brand-profile-card';
+import { PipelinePoller } from '@/components/clients/pipeline-poller';
 import { PipelineStep } from '@/components/clients/pipeline-step';
 import { dbToBrandProfile } from '@/lib/supabase/database.types';
 import { createClient } from '@/lib/supabase/server';
@@ -154,7 +155,30 @@ export default async function ClientPage({ params }: PageProps) {
     .limit(1)
     .maybeSingle();
 
-  const strategyStatus = (strategyCount ?? 0) > 0 ? 'approved' : inProgressStrategy ? 'in_review' : 'unlocked';
+  const { data: generatingStrategy } = await supabase
+    .from('strategies')
+    .select('id')
+    .eq('brand_profile_id', id)
+    .eq('agency_id', user.id)
+    .eq('status', 'generating')
+    .limit(1)
+    .maybeSingle();
+
+  const { data: failedStrategy } = await supabase
+    .from('strategies')
+    .select('id')
+    .eq('brand_profile_id', id)
+    .eq('agency_id', user.id)
+    .eq('status', 'failed')
+    .limit(1)
+    .maybeSingle();
+
+  const strategyStatus =
+    (strategyCount ?? 0) > 0 ? 'approved' :
+    generatingStrategy ? 'generating' :
+    failedStrategy ? 'failed' :
+    inProgressStrategy ? 'in_review' :
+    'unlocked';
 
   const { count: calendarCount } = await supabase
     .from('editorial_calendars')
@@ -172,14 +196,31 @@ export default async function ClientPage({ params }: PageProps) {
     .limit(1)
     .maybeSingle();
 
+  const { data: generatingCalendar } = await supabase
+    .from('editorial_calendars')
+    .select('id')
+    .eq('brand_profile_id', id)
+    .eq('agency_id', user.id)
+    .eq('agency_status', 'generating')
+    .limit(1)
+    .maybeSingle();
+
+  const { data: failedCalendar } = await supabase
+    .from('editorial_calendars')
+    .select('id')
+    .eq('brand_profile_id', id)
+    .eq('agency_id', user.id)
+    .eq('agency_status', 'failed')
+    .limit(1)
+    .maybeSingle();
+
   const calendarStatus =
-    strategyStatus !== 'approved'
-      ? 'locked'
-      : (calendarCount ?? 0) > 0
-        ? 'approved'
-        : pendingCalendar
-          ? 'in_review'
-          : 'unlocked';
+    strategyStatus !== 'approved' ? 'locked' :
+    (calendarCount ?? 0) > 0 ? 'approved' :
+    generatingCalendar ? 'generating' :
+    failedCalendar ? 'failed' :
+    pendingCalendar ? 'in_review' :
+    'unlocked';
 
   const { count: copyCount } = await supabase
     .from('copywriting_projects')
@@ -197,14 +238,40 @@ export default async function ClientPage({ params }: PageProps) {
     .limit(1)
     .maybeSingle();
 
+  const { data: generatingCopy } = await supabase
+    .from('copywriting_projects')
+    .select('id')
+    .eq('brand_profile_id', id)
+    .eq('agency_id', user.id)
+    .eq('agency_status', 'generating')
+    .limit(1)
+    .maybeSingle();
+
+  const { data: failedCopy } = await supabase
+    .from('copywriting_projects')
+    .select('id')
+    .eq('brand_profile_id', id)
+    .eq('agency_id', user.id)
+    .eq('agency_status', 'failed')
+    .limit(1)
+    .maybeSingle();
+
   const copyStatus =
-    calendarStatus !== 'approved'
-      ? 'locked'
-      : (copyCount ?? 0) > 0
-        ? 'approved'
-        : pendingCopy
-          ? 'in_review'
-          : 'unlocked';
+    calendarStatus !== 'approved' ? 'locked' :
+    (copyCount ?? 0) > 0 ? 'approved' :
+    generatingCopy ? 'generating' :
+    failedCopy ? 'failed' :
+    pendingCopy ? 'in_review' :
+    'unlocked';
+
+  const generatingAgents: string[] = [];
+  const failedAgents: string[] = [];
+  if (strategyStatus === 'generating') generatingAgents.push('Strategy Agent');
+  if (strategyStatus === 'failed') failedAgents.push('Strategy Agent');
+  if (calendarStatus === 'generating') generatingAgents.push('Calendar Agent');
+  if (calendarStatus === 'failed') failedAgents.push('Calendar Agent');
+  if (copyStatus === 'generating') generatingAgents.push('Copy Agent');
+  if (copyStatus === 'failed') failedAgents.push('Copy Agent');
 
   return (
     <main className="mx-auto max-w-3xl space-y-6 p-6">
@@ -248,24 +315,47 @@ export default async function ClientPage({ params }: PageProps) {
             index={2}
             label="Strategy Agent"
             status={strategyStatus}
-            href={strategyStatus === 'unlocked' || strategyStatus === 'in_review' ? `/clients/${id}/strategy/new` : undefined}
+            href={
+              strategyStatus === 'unlocked' ||
+              strategyStatus === 'in_review' ||
+              strategyStatus === 'failed'
+                ? `/clients/${id}/strategy/new`
+                : undefined
+            }
           />
           <PipelineStep
             index={3}
             label="Calendar Agent"
             status={calendarStatus}
-            href={calendarStatus === 'unlocked' || calendarStatus === 'in_review' ? `/clients/${id}/calendar` : undefined}
+            href={
+              calendarStatus === 'unlocked' ||
+              calendarStatus === 'in_review' ||
+              calendarStatus === 'failed'
+                ? `/clients/${id}/calendar`
+                : undefined
+            }
           />
           <PipelineStep
             index={4}
             label="Copy"
             status={copyStatus}
-            href={copyStatus === 'unlocked' || copyStatus === 'in_review' ? `/clients/${id}/copywriter` : undefined}
+            href={
+              copyStatus === 'unlocked' ||
+              copyStatus === 'in_review' ||
+              copyStatus === 'failed'
+                ? `/clients/${id}/copywriter`
+                : undefined
+            }
           />
           <PipelineStep index={5} label="Visual Brief" status="locked" />
           <PipelineStep index={6} label="Report" status="locked" />
         </div>
       </section>
+      <PipelinePoller
+        generatingAgents={generatingAgents}
+        failedAgents={failedAgents}
+        clientName={profile.clientName}
+      />
     </main>
   );
 }
