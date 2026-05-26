@@ -2,6 +2,7 @@
 
 import { useRef, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 import { CalendarGrid } from '@/components/calendar/calendar-grid';
 import { DateRangePicker } from '@/components/calendar/date-range-picker';
@@ -16,7 +17,7 @@ interface CalendarPageProps {
   initialCalendar: EditorialCalendar | null;
 }
 
-type PageState = 'generate' | 'loading' | 'edit' | 'agency-review' | 'agency-approved';
+type PageState = 'generate' | 'edit' | 'agency-review' | 'agency-approved';
 
 function deriveInitialState(calendar: EditorialCalendar | null): PageState {
   if (!calendar) return 'generate';
@@ -25,6 +26,7 @@ function deriveInitialState(calendar: EditorialCalendar | null): PageState {
 }
 
 export function CalendarPage({ profile, strategy, initialCalendar }: CalendarPageProps) {
+  const router = useRouter();
   const [calendar, setCalendar] = useState<EditorialCalendar | null>(initialCalendar);
   const [state, setState] = useState<PageState>(() => deriveInitialState(initialCalendar));
   const [error, setError] = useState<string | null>(null);
@@ -49,7 +51,6 @@ export function CalendarPage({ profile, strategy, initialCalendar }: CalendarPag
   const [editNotes, setEditNotes] = useState('');
 
   const handleGenerate = async () => {
-    setState('loading');
     setError(null);
     try {
       const res = await fetch('/api/agents/calendar', {
@@ -67,11 +68,9 @@ export function CalendarPage({ profile, strategy, initialCalendar }: CalendarPag
         const msg = (json as { error?: string }).error ?? 'Error al generar el calendario';
         throw new Error(msg);
       }
-      setCalendar(json as EditorialCalendar);
-      setState('agency-review');
+      router.push(`/clients/${profile.id}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error desconocido');
-      setState('generate');
     }
   };
 
@@ -212,6 +211,9 @@ export function CalendarPage({ profile, strategy, initialCalendar }: CalendarPag
   if (state === 'generate') {
     return (
       <div className="space-y-6">
+        <Link href={`/clients/${profile.id}`} className="text-xs text-primary hover:underline">
+          ← Volver a {profile.clientName}
+        </Link>
         <header>
           <h1 className="text-2xl font-semibold">Calendario editorial</h1>
           <p className="text-sm text-muted-foreground mt-1">
@@ -234,15 +236,6 @@ export function CalendarPage({ profile, strategy, initialCalendar }: CalendarPag
     );
   }
 
-  if (state === 'loading') {
-    return (
-      <div className="flex flex-col items-center justify-center py-20 space-y-4">
-        <div className="w-12 h-12 border-2 border-[var(--brand-primary)] border-t-transparent rounded-full animate-spin" />
-        <p className="text-sm text-muted-foreground">Generando calendario con IA...</p>
-      </div>
-    );
-  }
-
   if (!calendar) return null;
 
   const campaignLabel = `${calendar.campaignStart} → ${calendar.campaignEnd}`;
@@ -256,6 +249,9 @@ export function CalendarPage({ profile, strategy, initialCalendar }: CalendarPag
 
   return (
     <div className="space-y-4">
+      <Link href={`/clients/${profile.id}`} className="text-xs text-primary hover:underline">
+        ← Volver a {profile.clientName}
+      </Link>
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
