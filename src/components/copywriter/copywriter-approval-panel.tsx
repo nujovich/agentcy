@@ -86,6 +86,25 @@ export function CopywriterApprovalPanel({
           <p className="text-sm text-muted-foreground">
             Revisá el copy y aprobalo o pedí cambios.
           </p>
+          {project.modelUsed && (
+            <div className="flex items-center gap-2 mt-1">
+              <span
+                className="font-mono text-[10px] rounded px-2 py-0.5 border"
+                style={{
+                  background: 'var(--brand-primary-soft)',
+                  color: 'var(--brand-primary-dark)',
+                  borderColor: 'rgba(13,115,119,0.2)',
+                }}
+              >
+                {project.modelUsed}
+              </span>
+              {project.elapsedMs && (
+                <span className="font-mono text-[10px] text-muted-foreground">
+                  {Math.round(project.elapsedMs / 1000)}s
+                </span>
+              )}
+            </div>
+          )}
         </div>
         <span
           className="shrink-0 rounded-full px-3 py-1 font-mono text-[11px] font-semibold uppercase tracking-[0.06em]"

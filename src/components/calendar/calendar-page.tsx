@@ -290,7 +290,28 @@ export function CalendarPage({ profile, strategy, initialCalendar }: CalendarPag
       {(state === 'agency-review' || state === 'edit') && (
         <div className="rounded-lg border border-border bg-card p-4 space-y-3">
           <div className="flex items-center justify-between">
-            <p className="text-sm font-medium">Revisión de agencia</p>
+            <div className="flex items-center gap-3">
+              <p className="text-sm font-medium">Revisión de agencia</p>
+              {calendar.modelUsed && (
+                <div className="flex items-center gap-1.5">
+                  <span
+                    className="font-mono text-[10px] rounded px-2 py-0.5 border"
+                    style={{
+                      background: 'var(--brand-primary-soft)',
+                      color: 'var(--brand-primary-dark)',
+                      borderColor: 'rgba(13,115,119,0.2)',
+                    }}
+                  >
+                    {calendar.modelUsed}
+                  </span>
+                  {calendar.elapsedMs && (
+                    <span className="font-mono text-[10px] text-muted-foreground">
+                      {Math.round(calendar.elapsedMs / 1000)}s
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
             <span className="text-xs bg-[var(--brand-warning-soft)] border border-[var(--brand-warning)]/30 rounded-full px-2 py-0.5" style={{ color: 'var(--brand-warning)' }}>
               Pendiente
             </span>

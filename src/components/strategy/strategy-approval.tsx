@@ -40,12 +40,25 @@ export function StrategyApproval({ strategy, onApprove, onReject }: StrategyAppr
             Revisá la estrategia y aprobala o pedí cambios con feedback.
           </p>
         </div>
-        <span
-          className="shrink-0 rounded-full px-3 py-1 font-mono text-[11px] font-semibold uppercase tracking-[0.06em]"
-          style={{ background: 'var(--brand-accent-soft)', color: 'var(--brand-accent-dark)' }}
-        >
-          Borrador
-        </span>
+        {strategy.modelUsed && (
+          <div className="flex shrink-0 items-center gap-2">
+            <span
+              className="font-mono text-[10px] rounded px-2 py-0.5 border"
+              style={{
+                background: 'var(--brand-primary-soft)',
+                color: 'var(--brand-primary-dark)',
+                borderColor: 'rgba(13,115,119,0.2)',
+              }}
+            >
+              {strategy.modelUsed}
+            </span>
+            {strategy.elapsedMs && (
+              <span className="font-mono text-[10px] text-muted-foreground">
+                {Math.round(strategy.elapsedMs / 1000)}s
+              </span>
+            )}
+          </div>
+        )}
       </header>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
