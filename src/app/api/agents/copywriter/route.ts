@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { after, NextResponse } from 'next/server';
 import { z } from 'zod';
 
 import { CopywriterAgent } from '@/agents/copywriter.agent';
@@ -65,15 +65,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Brand profile not found' }, { status: 404 });
   }
 
-  // Delete any existing rejected project for this calendar before regenerating
+  // Delete any existing failed/rejected project before retrying
   await supabase
     .from('copywriting_projects')
     .delete()
     .eq('editorial_calendar_id', calendarId)
     .eq('agency_id', user.id)
-    .eq('agency_status', 'rejected');
+    .in('agency_status', ['rejected', 'failed']);
 
-  // Return existing pending/approved project without re-generating
+  // Return existing pending/approved/generating project without re-generating
   const { data: existing } = await supabase
     .from('copywriting_projects')
     .select('*')
@@ -88,35 +88,54 @@ export async function POST(request: Request) {
   const calendar = dbToEditorialCalendar(calendarRow);
   const profile = dbToBrandProfile(profileRow);
 
-  try {
-    const provider = createProvider('anthropic', 'claude-opus-4-7');
-    const agent = new CopywriterAgent(provider);
-    const copies = await agent.run({ calendar, brandProfile: profile });
+  const placeholder: CopywritingProjectInsert = {
+    editorial_calendar_id: calendarId,
+    brand_profile_id: calendarRow.brand_profile_id,
+    agency_id: user.id,
+    copies: [],
+    agency_status: 'generating',
+  };
 
-    const insert: CopywritingProjectInsert = {
-      editorial_calendar_id: calendarId,
-      brand_profile_id: calendarRow.brand_profile_id,
-      agency_id: user.id,
-      copies,
-      agency_status: 'pending',
-    };
+  const { data: row, error: insertError } = await supabase
+    .from('copywriting_projects')
+    .insert(placeholder)
+    .select()
+    .single();
 
-    const { data: row, error: insertError } = await supabase
-      .from('copywriting_projects')
-      .insert(insert)
-      .select()
-      .single();
-
-    if (insertError || !row) {
-      throw new Error(insertError?.message ?? 'Failed to save copywriting project');
-    }
-
-    return NextResponse.json(dbToCopywritingProject(row));
-  } catch (err) {
-    const message = err instanceof Error ? err.message : 'Unknown error';
-    return NextResponse.json(
-      { error: `Copy generation failed: ${message}` },
-      { status: 500 },
-    );
+  if (insertError || !row) {
+    return NextResponse.json({ error: 'Failed to start generation' }, { status: 500 });
   }
+
+  const rowId = row.id;
+  const agencyId = user.id;
+
+  after(async () => {
+    const bg = await createClient();
+    const startTime = Date.now();
+    try {
+      const provider = createProvider('anthropic', 'claude-opus-4-7');
+      const agent = new CopywriterAgent(provider);
+      const copies = await agent.run({ calendar, brandProfile: profile });
+      const elapsedMs = Date.now() - startTime;
+
+      await bg
+        .from('copywriting_projects')
+        .update({
+          copies,
+          agency_status: 'pending',
+          model_used: 'claude-opus-4-7',
+          elapsed_ms: elapsedMs,
+        })
+        .eq('id', rowId)
+        .eq('agency_id', agencyId);
+    } catch {
+      await bg
+        .from('copywriting_projects')
+        .update({ agency_status: 'failed', elapsed_ms: Date.now() - startTime })
+        .eq('id', rowId)
+        .eq('agency_id', agencyId);
+    }
+  });
+
+  return NextResponse.json({ id: rowId, status: 'generating' });
 }
